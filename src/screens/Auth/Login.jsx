@@ -113,30 +113,30 @@ const Login = () => {
 
   const API_URL = import.meta.env.VITE_API_BASE_URL; // Get API URL from .env
 
-  const handleLogin = async () => {
-    try {
-      const response = await fetch(`${API_URL}/login/`, { // Use API_URL
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username: email, password }),
-      });
+  // const handleLogin = async () => {
+  //   try {
+  //     const response = await fetch(`${API_URL}/login/`, { // Use API_URL
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ username: email, password }),
+  //     });
   
-      const data = await response.json();
-      console.log("response===>", response);
+  //     const data = await response.json();
+  //     console.log("response===>", response);
   
-      if (response.ok) {
-        localStorage.setItem("auth", "true");
-        localStorage.setItem("token", data.token); // Assuming API returns a token
-        navigate("/dashboard");
-      } else {
-        setError(data.message || "Invalid credentials. Please try again.");
-      }
-    } catch (error) {
-      setError("Something went wrong. Please try again later.");
-    }
-  };
+  //     if (response.ok) {
+  //       localStorage.setItem("auth", "true");
+  //       localStorage.setItem("token", data.token); // Assuming API returns a token
+  //       navigate("/dashboard");
+  //     } else {
+  //       setError(data.message || "Invalid credentials. Please try again.");
+  //     }
+  //   } catch (error) {
+  //     setError("Something went wrong. Please try again later.");
+  //   }
+  // };
   
 
   return (
