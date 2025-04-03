@@ -109,7 +109,6 @@ const Login = () => {
   const [error, setError] = useState("");
 
   const handleLogin = async () => {
-    // 
     try {
       const response = await fetch("https://stage.suniyenetajee.com/api/v1/web/login/", {
         method: "POST",
