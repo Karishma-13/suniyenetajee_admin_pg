@@ -1,0 +1,87 @@
+/* Dashboard.css */
+
+/* General Styles */
+.container {
+  padding: 20px;
+}
+
+/* Stats Cards */
+.stat-card {
+  border-radius: 10px;
+  padding: 20px;
+  text-align: left;
+  transition: 0.3s ease-in-out;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-icon-container {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.stat-icon {
+  font-size: 24px;
+}
+
+/* Manage Posts Section */
+.manage-posts {
+  margin-top: 30px;
+}
+
+.manage-posts .post-card {
+  border-radius: 10px;
+  transition: 0.3s ease-in-out;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.manage-posts .post-card:hover {
+  transform: translateY(-5px);
+}
+
+.manage-posts .post-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Charts */
+.chart-container {
+  height: 350px;
+}
+
+.pie-chart-container {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Recent Users */
+.recent-user-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.recent-user-item:last-child {
+  border-bottom: none;
+}
+
+.avatar-circle-sm {
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: bold;
+}
