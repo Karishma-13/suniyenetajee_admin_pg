@@ -76,7 +76,7 @@ const Dashboard = () => {
       title: "New Policies Announcement",
       content:
         "The government has introduced new policies for economic growth.",
-      author: "Admin",
+      author: "Sparta",
       date: "2025-04-01",
     },
     {
@@ -84,14 +84,14 @@ const Dashboard = () => {
       title: "Healthcare Improvements",
       content:
         "New hospitals are being built to improve healthcare facilities.",
-      author: "User1",
+      author: "Tom",
       date: "2025-04-02",
     },
     {
       id: 3,
       title: "Agricultural Support Scheme",
       content: "Government launches support scheme for farmers.",
-      author: "User2",
+      author: "Jhon",
       date: "2025-04-03",
     },
   ];
