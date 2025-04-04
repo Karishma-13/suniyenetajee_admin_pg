@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, Card, Button } from "react-bootstrap";
+import { Container, Card, Button, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa"; // Import left arrow icon
 
@@ -85,17 +85,25 @@ const dummyPosts = [
 
 const Posts = () => {
   const [posts, setPosts] = useState(dummyPosts);
-    const [showModal, setShowModal] = useState(false);
-    const [selectedPost, setSelectedPost] = useState(null);
-    
+  const [showModal, setShowModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+
   const navigate = useNavigate();
 
   const handleDelete = (id) => {
     setPosts(posts.filter((post) => post.id !== id));
   };
 
-  const handleFlag = (id) => {
-    setPosts(posts.filter((post) => post.id !== id));
+  const handleFlag = (post) => {
+    setSelectedPost(post);
+    setShowModal(true);
+  };
+
+  const confirmFlag = () => {
+    if (!selectedPost) return; // Prevents errors if no post is selected
+    setPosts(posts.filter((post) => post.id !== selectedPost.id));
+    setShowModal(false);
+    setSelectedPost(null); // Reset selected post
   };
 
   return (
@@ -231,7 +239,7 @@ const Posts = () => {
                     borderColor: colors.btncolor,
                     width: "65px",
                   }}
-                  onClick={() => handleFlag(post.id)}
+                  onClick={() => handleFlag(post)}
                 >
                   Flag
                 </Button>
@@ -243,6 +251,32 @@ const Posts = () => {
           </Card>
         ))}
       </div>
+
+      {/* Flag Warning Modal */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>⚠️ Warning: Inappropriate Content</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            The post you are flagging contains content that violates our
+            community guidelines.
+          </p>
+          <p>
+            If the user continues to post inappropriate content, their account
+            may be suspended or permanently banned.
+          </p>
+          <p>Do you want to proceed with flagging this post?</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmFlag}>
+            Confirm Flag
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };

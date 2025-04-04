@@ -71,9 +71,29 @@ const Dashboard = () => {
   ];
 
   const posts = [
-    { id: 1, title: "First Post", author: "Admin", date: "2025-04-01" },
-    { id: 2, title: "Second Post", author: "User1", date: "2025-04-02" },
-    { id: 3, title: "Third Post", author: "User2", date: "2025-04-03" },
+    {
+      id: 1,
+      title: "New Policies Announcement",
+      content:
+        "The government has introduced new policies for economic growth.",
+      author: "Admin",
+      date: "2025-04-01",
+    },
+    {
+      id: 2,
+      title: "Healthcare Improvements",
+      content:
+        "New hospitals are being built to improve healthcare facilities.",
+      author: "User1",
+      date: "2025-04-02",
+    },
+    {
+      id: 3,
+      title: "Agricultural Support Scheme",
+      content: "Government launches support scheme for farmers.",
+      author: "User2",
+      date: "2025-04-03",
+    },
   ];
 
   return (
@@ -100,7 +120,7 @@ const Dashboard = () => {
       </Row>
 
       {/* Charts Section */}
-      <Row className="g-3 mb-4">
+      <Row className="g-3 mb-4" style={{ justifyContent: "space-between" }}>
         <Col xs={12} lg={8}>
           <Card className="border-0 shadow-sm">
             <Card.Body>
@@ -133,6 +153,29 @@ const Dashboard = () => {
             </Card.Body>
           </Card>
         </Col>
+        <Col xs={12} lg={2}>
+          <Card className="border-0 shadow-sm h-100">
+            <Card.Body>
+              <h5 className="fw-bold mb-3">Labels</h5>
+              <div className="d-flex flex-wrap gap-2">
+                {[
+                  "God label",
+                  "Dummy God label",
+                  "Managers",
+                  "Manager",
+                  "Reporter",
+                ].map((label, idx) => (
+                  <span
+                    key={idx}
+                    className="badge bg-secondary px-3 py-2 text-capitalize"
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
       </Row>
 
       {/* Manage Posts Section */}
@@ -151,6 +194,7 @@ const Dashboard = () => {
                   <tr>
                     <th>#</th>
                     <th>Title</th>
+                    <th>Content</th>
                     <th>Author</th>
                     <th>Date</th>
                     <th>Actions</th>
@@ -160,7 +204,16 @@ const Dashboard = () => {
                   {posts.map((post) => (
                     <tr key={post.id}>
                       <td>{post.id}</td>
-                      <td>{post.title}</td>
+                      <td>
+                        {post.title.length > 60
+                          ? post.title.slice(0, 60) + "..."
+                          : post.title}
+                      </td>
+                      <td>
+                        {post.content.length > 60
+                          ? post.content.slice(0, 60) + "..."
+                          : post.content}
+                      </td>
                       <td>{post.author}</td>
                       <td>{post.date}</td>
                       <td>
