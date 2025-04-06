@@ -49,27 +49,27 @@ const Login = () => {
 
   const handleLogin = async () => {
     // Uncomment this for API usage
-    // try {
-    //   const response = await fetch("https://stage.suniyenetajee.com/api/v1/web/login/", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({ username: email, password }),
-    //   });
-    //   const data = await response.json();
-    //   if (response.ok) {
-    //     localStorage.setItem("auth", "true");
-    //     localStorage.setItem("token", data.token);
-    //     navigate("/dashboard");
-    //   } else {
-    //     setError(data.message || "Invalid credentials. Please try again.");
-    //   }
-    // } catch (error) {
-    //   setError("Something went wrong. Please try again later.");
-    // }
+    try {
+      const response = await fetch("https://stage.suniyenetajee.com/api/v1/web/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username: email, password }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem("auth", "true");
+        localStorage.setItem("token", data.token);
+        navigate("/dashboard");
+      } else {
+        setError(data.message || "Invalid credentials. Please try again.");
+      }
+    } catch (error) {
+      setError("Something went wrong. Please try again later.");
+    }
 
-    navigate("/dashboard");
+    // navigate("/dashboard");
   };
 
   return (
