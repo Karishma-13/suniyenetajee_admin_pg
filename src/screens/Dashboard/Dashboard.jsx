@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PostReview from "./PostReview";
 import {
   Container,
@@ -39,35 +39,38 @@ import {
 import "../../assets/css/Dashboard.css";
 import { Link } from "react-router-dom";
 
-const initialPosts = [
-  {
-    id: 1,
-    title: "New Policies Announcement",
-    content: "The government has introduced new policies for economic growth.",
-    author: "Sparta",
-    date: "2025-04-01",
-    flagged: false
-  },
-  {
-    id: 2,
-    title: "Healthcare Improvements",
-    content: "New hospitals are being built to improve healthcare facilities.",
-    author: "Tom",
-    date: "2025-04-02",
-    flagged: false
-  },
-  {
-    id: 3,
-    title: "Agricultural Support Scheme",
-    content: "Government launches support scheme for farmers.",
-    author: "Jhon",
-    date: "2025-04-03",
-    flagged: false
-  },
-];
+// Comment out the initialPosts
+// const initialPosts = [
+//   {
+//     id: 1,
+//     title: "New Policies Announcement",
+//     content: "The government has introduced new policies for economic growth.",
+//     author: "Sparta",
+//     date: "2025-04-01",
+//     flagged: false
+//   },
+//   {
+//     id: 2,
+//     title: "Healthcare Improvements",
+//     content: "New hospitals are being built to improve healthcare facilities.",
+//     author: "Tom",
+//     date: "2025-04-02",
+//     flagged: false
+//   },
+//   {
+//     id: 3,
+//     title: "Agricultural Support Scheme",
+//     content: "Government launches support scheme for farmers.",
+//     author: "Jhon",
+//     date: "2025-04-03",
+//     flagged: false
+//   },
+// ];
 
 const Dashboard = () => {
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showFlagModal, setShowFlagModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPostDetailModal, setShowPostDetailModal] = useState(false);
@@ -86,6 +89,54 @@ const Dashboard = () => {
   });
   const [formErrors, setFormErrors] = useState({});
   
+  useEffect(() => {
+    // Fetch posts from API
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('https://stage.suniyenetajee.com/api/v1/web/posts/?status=pending', {
+          headers: {
+            'Authorization': 'Token 7b257e1452f1115b0c70f80a1d54ccd8615aa52c'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Log the raw API response data for inspection
+        console.log('API Response Data:', data);
+        console.log('API Results:', data.results);
+        
+        // Transform API data to match our application structure
+        const formattedPosts = data.results.map(post => ({
+          id: post.id,
+          title: post.description || "No title", // Use description as title or default
+          content: post.description || "No content", // Use description as content as well
+          author: post.created_by.full_name,
+          date: new Date(post.date_created).toISOString().split('T')[0], // Format date
+          flagged: false,
+          image: post.media.length > 0 ? `https://stage.suniyenetajee.com${post.media[0].media}` : null,
+          authorImage: `https://stage.suniyenetajee.com${post.created_by.picture}`
+        }));
+        
+        // Log the formatted posts
+        console.log('Formatted Posts:', formattedPosts);
+        
+        setPosts(formattedPosts);
+      } catch (err) {
+        console.error("Error fetching posts:", err);
+        setError("Failed to load posts. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchPosts();
+  }, []);
+
   // Handle edit changes
   const handleEditChange = (e) => {
     const { name, value } = e.target;
@@ -121,7 +172,8 @@ const Dashboard = () => {
 
   // Helper function to check if a post is an admin post
   const isAdminPost = (post) => {
-    return post.author === 'Admin' || post.author === 'Government';
+    // For now, no posts are considered admin posts until we have an admin flag
+    return false; // Will be updated when admin flag is available in API
   };
   
   const handleNewPostChange = (e) => {
@@ -397,7 +449,6 @@ const Dashboard = () => {
               <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
                 <h5 className="fw-bold mb-0 mb-3 mb-md-0">Manage Posts</h5>
                 <div className="d-flex flex-column flex-sm-row gap-2">
-                  {/* <Link to="/postreview" className="w-100"> */}
                   <Button
                     className="w-100"
                     style={{
@@ -425,11 +476,23 @@ const Dashboard = () => {
                   >
                     + New Post
                   </Button>
-                  {/* </Link> */}
                 </div>
               </div>
 
-              <PostReview posts={posts} setPosts={setPosts} />
+              {loading ? (
+                <div className="text-center p-5">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                  <p className="mt-3">Loading posts...</p>
+                </div>
+              ) : error ? (
+                <div className="alert alert-danger" role="alert">
+                  {error}
+                </div>
+              ) : (
+                <PostReview posts={posts} setPosts={setPosts} />
+              )}
             </Card.Body>
           </Card>
         </Col>
@@ -617,28 +680,43 @@ const Dashboard = () => {
         <Modal.Body style={{ maxHeight: "70vh", overflowY: "auto" }}>
           {selectedPost && (
             <Card className="border-0 shadow-sm">
-              <div className="d-flex justify-content-center">
-                <div style={{ width: "100%", maxWidth: "18rem" }}>
-                  <Card.Img
-                    variant="top"
-                    src={
-                      selectedPost.title.toLowerCase().includes("healthcare")
-                        ? "https://firsteditionfirstaid.ca/wp-content/uploads/2022/08/An-apple-a-day_-Will-it-really-keep-the-doctor-away-IMAGE.png"
-                        : selectedPost.title
-                          .toLowerCase()
-                          .includes("agricultural")
-                          ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSR7ahvb8aEN76vOIivqeFpa9_gBV5rZm2erw&s"
-                          : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0sCSNq1Leueb3UMTJ1dNwwNqk7gRmeCkUn6C7JoVlgd7pewsg4I8ckmUFedWxsEe6Cxs&usqp=CAU"
-                    }
-                    style={{
-                      height: "auto",
-                      aspectRatio: "16/9",
-                      objectFit: "cover",
-                    }}
-                    className="img-fluid"
-                  />
+              {selectedPost.image ? (
+                <div className="d-flex justify-content-center">
+                  <div style={{ width: "100%", maxWidth: "18rem" }}>
+                    <Card.Img
+                      variant="top"
+                      src={selectedPost.image}
+                      style={{
+                        height: "auto",
+                        aspectRatio: "16/9",
+                        objectFit: "cover",
+                      }}
+                      className="img-fluid"
+                      onError={(e) => {
+                        e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="d-flex justify-content-center">
+                  <div 
+                    style={{ 
+                      width: "100%", 
+                      maxWidth: "18rem", 
+                      height: "200px", 
+                      background: "#f8f9fa", 
+                      border: "1px dashed #dee2e6", 
+                      display: "flex", 
+                      alignItems: "center", 
+                      justifyContent: "center",
+                      borderRadius: "4px" 
+                    }}
+                  >
+                    <span className="text-muted">No Media</span>
+                  </div>
+                </div>
+              )}
               <Card.Body>
                 {isEditMode ? (
                   // Edit Mode - Show form fields

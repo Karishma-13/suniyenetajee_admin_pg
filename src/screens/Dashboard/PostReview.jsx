@@ -34,34 +34,35 @@ const colors = {
   btncolor: "#4165E8",
 };
 
-const dummyPosts = [
-  {
-    id: 1,
-    title: "New Policies Announcement",
-    content: "The government has introduced new policies for economic growth.",
-    author: "Sparta",
-    date: "2025-04-01",
-    flagged: false,
-  },
-  {
-    id: 2,
-    title: "Healthcare Improvements",
-    content: "New hospitals are being built to improve healthcare facilities.",
-    author: "Tom",
-    date: "2025-04-02",
-    flagged: false,
-  },
-  {
-    id: 3,
-    title: "Agricultural Support Scheme",
-    content: "Government launches support scheme for farmers.",
-    author: "Jhon",
-    date: "2025-04-03",
-    flagged: false,
-  },
-];
+// Comment out the dummy posts as we're now using API data
+// const dummyPosts = [
+//   {
+//     id: 1,
+//     title: "New Policies Announcement",
+//     content: "The government has introduced new policies for economic growth.",
+//     author: "Sparta",
+//     date: "2025-04-01",
+//     flagged: false,
+//   },
+//   {
+//     id: 2,
+//     title: "Healthcare Improvements",
+//     content: "New hospitals are being built to improve healthcare facilities.",
+//     author: "Tom",
+//     date: "2025-04-02",
+//     flagged: false,
+//   },
+//   {
+//     id: 3,
+//     title: "Agricultural Support Scheme",
+//     content: "Government launches support scheme for farmers.",
+//     author: "Jhon",
+//     date: "2025-04-03",
+//     flagged: false,
+//   },
+// ];
 
-const PostReview = ({ inDashboard = false, posts = dummyPosts, setPosts }) => {
+const PostReview = ({ inDashboard = false, posts = [], setPosts }) => {
   const [showFlagModal, setShowFlagModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPostDetailModal, setShowPostDetailModal] = useState(false);
@@ -71,9 +72,10 @@ const PostReview = ({ inDashboard = false, posts = dummyPosts, setPosts }) => {
 
   const navigate = useNavigate();
 
-  // Helper function to check if a post is an admin post
+  // Helper function to check if a post is an admin post - update to handle API structure
   const isAdminPost = (post) => {
-    return post.author === 'Admin' || post.author === 'Sparta';
+    // For now, no posts are considered admin posts until we have an admin flag
+    return false; // Will be updated when admin flag is available in API
   };
 
   const handleDelete = (id) => {
@@ -125,6 +127,16 @@ const PostReview = ({ inDashboard = false, posts = dummyPosts, setPosts }) => {
     setIsEditMode(true);
   };
 
+  // Function to get user avatar
+  const getUserAvatar = (post) => {
+    if (post.authorImage) {
+      return post.authorImage;
+    }
+    
+    // Fallback to randomuser.me images
+    return `https://randomuser.me/api/portraits/men/${Math.floor(Math.random() * 90) + 10}.jpg`;
+  };
+
   return (
     <Container
       fluid
@@ -154,109 +166,116 @@ const PostReview = ({ inDashboard = false, posts = dummyPosts, setPosts }) => {
                   <Table bordered hover responsive className="mb-0 table-aligned-with-header">
                     <thead>
                       <tr>
-                        <th style={{ width: "5%" }}>S.No.</th>
-                        <th style={{ width: "20%" }}>Title</th>
-                        <th style={{ width: "28%" }}>Content</th>
+                        <th style={{ width: "5%" }}>ID</th>
+                        <th style={{ width: "20%" }}>Content</th>
+                        <th style={{ width: "28%" }}>Media</th>
                         <th style={{ width: "15%" }}>Author</th>
                         <th style={{ width: "12%" }}>Date</th>
                         <th style={{ width: "5%" }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {posts.map((post) => (
-                        <tr key={post.id}>
-                          <td style={{ verticalAlign: "middle" }}>{post.id}</td>
-                          <td
-                            onClick={() => {
-                              setSelectedPost(post);
-                              setShowPostDetailModal(true);
-                            }}
-                            style={{ cursor: "pointer", verticalAlign: "middle" }}
-                          >
-                            {post.title.length > 60
-                              ? post.title.slice(0, 60) + "..."
-                              : post.title}
-                          </td>
-                          <td
-                            onClick={() => {
-                              setSelectedPost(post);
-                              setShowPostDetailModal(true);
-                            }}
-                            style={{ cursor: "pointer", verticalAlign: "middle" }}
-                          >
-                            {post.content.length > 60
-                              ? post.content.slice(0, 60) + "..."
-                              : post.content}
-                          </td>
-                          <td style={{ verticalAlign: "middle" }}>
-                            <div className="d-flex align-items-center">
-                              <div
-                                className="rounded-circle me-2 overflow-hidden"
-                                style={{
-                                  width: "24px",
-                                  height: "24px",
-                                  backgroundSize: "cover",
-                                  backgroundPosition: "center",
-                                  backgroundImage: `url(${
-                                    post.author === "Sparta"
-                                      ? "https://randomuser.me/api/portraits/men/32.jpg"
-                                      : post.author === "Tom"
-                                        ? "https://randomuser.me/api/portraits/men/41.jpg"
-                                        : post.author === "Jhon"
-                                          ? "https://randomuser.me/api/portraits/men/55.jpg"
-                                          : `https://randomuser.me/api/portraits/men/${Math.floor(Math.random() * 90) + 10}.jpg`
-                                  })`
-                                }}
-                              />
-                              {post.author}
-                            </div>
-                          </td>
-                          <td style={{ verticalAlign: "middle" }}>{post.date}</td>
-                          <td style={{ verticalAlign: "middle" }}>
-                            <div className="post-actions d-flex justify-content-center align-items-center">
-                              <Button variant="light" size="sm" className="me-1">
-                                <FiClock style={{ color: "#f0ad4e" }} />
-                              </Button>
-                              <Button
-                                variant={post.flagged ? "success" : "light"}
-                                size="sm"
-                                className="me-1"
-                                onClick={() => {
-                                  if (post.flagged) {
-                                    // If already flagged, unflag directly without showing modal
-                                    const updatedPosts = posts.map((p) =>
-                                      p.id === post.id
-                                        ? { ...p, flagged: false }
-                                        : p
-                                    );
-                                    setPosts(updatedPosts);
-                                  } else {
-                                    // If not flagged, show the flag modal
-                                    setSelectedPost(post);
-                                    setShowFlagModal(true);
-                                  }
-                                }}
-                              >
-                                <FiFlag
-                                  style={{
-                                    color: post.flagged ? "white" : "black",
+                      {posts.length === 0 ? (
+                        <tr>
+                          <td colSpan="6" className="text-center py-4">No posts available</td>
+                        </tr>
+                      ) : (
+                        posts.map((post) => (
+                          <tr key={post.id}>
+                            <td style={{ verticalAlign: "middle" }}>{post.id}</td>
+                            <td
+                              onClick={() => {
+                                setSelectedPost(post);
+                                setShowPostDetailModal(true);
+                              }}
+                              style={{ cursor: "pointer", verticalAlign: "middle" }}
+                            >
+                              {post.title?.length > 60
+                                ? post.title.slice(0, 60) + "..."
+                                : post.title || "No content"}
+                            </td>
+                            <td
+                              onClick={() => {
+                                setSelectedPost(post);
+                                setShowPostDetailModal(true);
+                              }}
+                              style={{ cursor: "pointer", verticalAlign: "middle" }}
+                            >
+                              {post.image ? (
+                                <img 
+                                  src={post.image} 
+                                  alt="Post media" 
+                                  style={{ height: "50px", width: "80px", objectFit: "cover" }}
+                                  onError={(e) => {
+                                    e.target.src = "https://via.placeholder.com/80x50?text=No+Image";
                                   }}
                                 />
-                              </Button>
-                              <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedPost(post);
-                                  setShowDeleteModal(true);
-                                }}
-                              >
-                                <FiTrash />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                              ) : (
+                                <span className="text-muted">No media</span>
+                              )}
+                            </td>
+                            <td style={{ verticalAlign: "middle" }}>
+                              <div className="d-flex align-items-center">
+                                <div
+                                  className="rounded-circle me-2 overflow-hidden"
+                                  style={{
+                                    width: "24px",
+                                    height: "24px",
+                                    backgroundSize: "cover",
+                                    backgroundPosition: "center",
+                                    backgroundImage: `url(${getUserAvatar(post)})`
+                                  }}
+                                />
+                                {post.author || "Unknown"}
+                              </div>
+                            </td>
+                            <td style={{ verticalAlign: "middle" }}>{post.date}</td>
+                            <td style={{ verticalAlign: "middle" }}>
+                              <div className="post-actions d-flex justify-content-center align-items-center">
+                                <Button variant="light" size="sm" className="me-1">
+                                  <FiClock style={{ color: "#f0ad4e" }} />
+                                </Button>
+                                <Button
+                                  variant={post.flagged ? "success" : "light"}
+                                  size="sm"
+                                  className="me-1"
+                                  onClick={() => {
+                                    if (post.flagged) {
+                                      // If already flagged, unflag directly without showing modal
+                                      const updatedPosts = posts.map((p) =>
+                                        p.id === post.id
+                                          ? { ...p, flagged: false }
+                                          : p
+                                      );
+                                      setPosts(updatedPosts);
+                                    } else {
+                                      // If not flagged, show the flag modal
+                                      setSelectedPost(post);
+                                      setShowFlagModal(true);
+                                    }
+                                  }}
+                                >
+                                  <FiFlag
+                                    style={{
+                                      color: post.flagged ? "white" : "black",
+                                    }}
+                                  />
+                                </Button>
+                                <Button
+                                  variant="danger"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedPost(post);
+                                    setShowDeleteModal(true);
+                                  }}
+                                >
+                                  <FiTrash />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </Table>
                 </Card.Body>
@@ -627,35 +646,49 @@ const PostReview = ({ inDashboard = false, posts = dummyPosts, setPosts }) => {
         <Modal.Body style={{ maxHeight: "70vh", overflowY: "auto" }}>
           {selectedPost && (
             <Card className="border-0 shadow-sm">
-              <div className="d-flex justify-content-center">
-                <div style={{ width: "100%", maxWidth: "18rem" }}>
-                  <Card.Img
-                    variant="top"
-                    src={
-                      selectedPost.image ? selectedPost.image : 
-                      selectedPost.title.toLowerCase().includes("healthcare")
-                        ? "https://firsteditionfirstaid.ca/wp-content/uploads/2022/08/An-apple-a-day_-Will-it-really-keep-the-doctor-away-IMAGE.png"
-                        : selectedPost.title
-                            .toLowerCase()
-                            .includes("agricultural")
-                        ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSR7ahvb8aEN76vOIivqeFpa9_gBV5rZm2erw&s"
-                        : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0sCSNq1Leueb3UMTJ1dNwwNqk7gRmeCkUn6C7JoVlgd7pewsg4I8ckmUFedWxsEe6Cxs&usqp=CAU"
-                    }
-                    style={{
-                      height: "auto",
-                      aspectRatio: "16/9",
-                      objectFit: "cover",
-                    }}
-                    className="img-fluid"
-                  />
+              {selectedPost.image ? (
+                <div className="d-flex justify-content-center">
+                  <div style={{ width: "100%", maxWidth: "18rem" }}>
+                    <Card.Img
+                      variant="top"
+                      src={selectedPost.image}
+                      style={{
+                        height: "auto",
+                        aspectRatio: "16/9",
+                        objectFit: "cover",
+                      }}
+                      className="img-fluid"
+                      onError={(e) => {
+                        e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="d-flex justify-content-center">
+                  <div 
+                    style={{ 
+                      width: "100%", 
+                      maxWidth: "18rem", 
+                      height: "200px", 
+                      background: "#f8f9fa", 
+                      border: "1px dashed #dee2e6", 
+                      display: "flex", 
+                      alignItems: "center", 
+                      justifyContent: "center",
+                      borderRadius: "4px" 
+                    }}
+                  >
+                    <span className="text-muted">No Media</span>
+                  </div>
+                </div>
+              )}
               <Card.Body>
                 {isEditMode ? (
                   // Edit Mode - Show form fields
                   <Form>
                     <Form.Group className="mb-3">
-                      <Form.Label>Title</Form.Label>
+                      <Form.Label>Content</Form.Label>
                       <Form.Control 
                         type="text" 
                         name="title" 
@@ -679,7 +712,7 @@ const PostReview = ({ inDashboard = false, posts = dummyPosts, setPosts }) => {
                       </Form.Select>
                     </Form.Group>
                     <Form.Group className="mb-3">
-                      <Form.Label>Content</Form.Label>
+                      <Form.Label>Description</Form.Label>
                       <Form.Control 
                         as="textarea" 
                         rows={5} 
@@ -693,63 +726,22 @@ const PostReview = ({ inDashboard = false, posts = dummyPosts, setPosts }) => {
                   // View Mode - Show content
                   <>
                     <Card.Title className="fw-bold mb-3">
-                      {selectedPost.title}
+                      {selectedPost.title || "No Title"}
                     </Card.Title>
                     <div className="mb-3">
-                      {selectedPost.category ? (
-                        <span className={`badge bg-${
-                          selectedPost.category === "Politics" ? "secondary" : 
-                          selectedPost.category === "Healthcare" ? "info" : 
-                          selectedPost.category === "Agriculture" ? "success" : 
-                          selectedPost.category === "Education" ? "warning" : 
-                          selectedPost.category === "Technology" ? "primary" : 
-                          "secondary"
-                        } me-2`}>{selectedPost.category}</span>
-                      ) : (
-                        <>
-                          {selectedPost.title.toLowerCase().includes("policies") && (
-                            <span className="badge bg-secondary me-2">Politics</span>
-                          )}
-                          {selectedPost.title.toLowerCase().includes("healthcare") && (
-                            <span className="badge bg-info me-2">Healthcare</span>
-                          )}
-                          {selectedPost.title
-                            .toLowerCase()
-                            .includes("agricultural") && (
-                            <span className="badge bg-success me-2">Agriculture</span>
-                          )}
-                        </>
+                      <span className="badge bg-primary me-2">User Post</span>
+                      {isAdminPost(selectedPost) && (
+                        <span className="badge bg-success me-2">Admin Post</span>
                       )}
-                      <span className="badge bg-primary">Featured</span>
                     </div>
-                    <Card.Text className="mb-4">{selectedPost.content}</Card.Text>
+                    <Card.Text className="mb-4">{selectedPost.content || "No content"}</Card.Text>
 
-                    {/* Additional content */}
+                    {/* Additional content - commented out
                     <h6 className="fw-bold mt-4">Background Information</h6>
                     <Card.Text className="mb-4">
-                      This policy announcement comes after months of deliberation
-                      and public consultation. The government has been working on
-                      these reforms since early 2025, with input from various
-                      stakeholders including industry leaders, civil society
-                      organizations, and academic experts.
+                      This post was submitted by a user on our platform.
                     </Card.Text>
-
-                    <h6 className="fw-bold mt-4">Impact Analysis</h6>
-                    <Card.Text className="mb-4">
-                      Economic experts predict these policies will boost GDP growth
-                      by 2-3% over the next fiscal year. Small businesses are
-                      expected to benefit significantly from tax incentives and
-                      reduced regulatory burdens. However, some sectors may face
-                      adjustment challenges in the short term.
-                    </Card.Text>
-
-                    <h6 className="fw-bold mt-4">Public Reaction</h6>
-                    <Card.Text className="mb-4">
-                      Initial public response has been mixed. A recent poll shows
-                      58% support for the new policies, with stronger approval among
-                      urban residents and younger demographics. Opposition parties
-                      have criticized aspects of the implementation timeline.
-                    </Card.Text>
+                    */}
                   </>
                 )}
 
@@ -764,29 +756,18 @@ const PostReview = ({ inDashboard = false, posts = dummyPosts, setPosts }) => {
                             height: "24px", 
                             backgroundSize: "cover",
                             backgroundPosition: "center",
-                            backgroundImage: `url(${
-                              selectedPost.author === "Sparta" 
-                                ? "https://randomuser.me/api/portraits/men/32.jpg" 
-                                : selectedPost.author === "Tom" 
-                                ? "https://randomuser.me/api/portraits/men/41.jpg" 
-                                : selectedPost.author === "Jhon"
-                                ? "https://randomuser.me/api/portraits/men/55.jpg"
-                                : `https://randomuser.me/api/portraits/men/${Math.floor(Math.random() * 90) + 10}.jpg`
-                            })`
+                            backgroundImage: `url(${getUserAvatar(selectedPost)})`
                           }}
                         />
-                        Posted By {selectedPost.author}
+                        Posted By {selectedPost.author || "Unknown"}
                       </div>
                     </small>
                     <small className="text-muted d-block">
                       Published on {selectedPost.date}
                     </small>
-                    <small className="text-muted d-block">
-                      Last updated: April 5, 2025
-                    </small>
                     {isAdminPost(selectedPost) && (
                       <small className="text-success d-block fw-bold">
-                        Admin Post
+                        Admin User
                       </small>
                     )}
                   </div>
