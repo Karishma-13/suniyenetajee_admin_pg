@@ -1,105 +1,6 @@
-// import React, { useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { Container, Card, Button } from "react-bootstrap";
-// import colors from "../../assets/css/colors.js";
-
-// const Login = () => {
-//   const navigate = useNavigate();
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const [error, setError] = useState("");
-
-//   const handleLogin = () => {
-//     // if (email === "admin@example.com" && password === "admin123") {
-//     //   localStorage.setItem("auth", "true");
-//     //   navigate("/dashboard");
-//     // } else {
-//     //   setError("Invalid credentials. Please try again.");
-//     // }
-
-//     navigate("/dashboard");
-//   };
-
-//   return (
-//     <Container
-//       fluid
-//       style={{
-//         backgroundColor: colors.backgroundColor,
-//         height: "100vh",
-//         display: "flex",
-//         justifyContent: "center",
-//         alignItems: "center",
-//       }}
-//     >
-//       <Card
-//         style={{
-//           padding: "30px", // Increased padding
-//           borderRadius: "10px",
-//           boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-//           minWidth: "400px", // Increased width
-//           maxWidth: "500px", // Ensuring it doesn't get too wide
-//         }}
-//       >
-//         <h3
-//           style={{
-//             color: colors.primary_black,
-//             textAlign: "center",
-//             marginBottom: "25px",
-//           }}
-//         >
-//           Admin Login
-//         </h3>
-//         {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
-//         <input
-//           type="email"
-//           placeholder="Email"
-//           value={email}
-//           onChange={(e) => setEmail(e.target.value)}
-//           style={{
-//             width: "100%",
-//             padding: "10px",
-//             marginBottom: "12px",
-//             border: "1px solid #ccc",
-//             borderRadius: "5px",
-//           }}
-//         />
-//         <input
-//           type="password"
-//           placeholder="Password"
-//           value={password}
-//           onChange={(e) => setPassword(e.target.value)}
-//           style={{
-//             width: "100%",
-//             padding: "10px",
-//             marginBottom: "10px",
-//             border: "1px solid #ccc",
-//             borderRadius: "5px",
-//           }}
-//         />
-//         <Button
-//           style={{
-//             backgroundColor: colors.btncolor,
-//             borderColor: colors.btncolor,
-//             width: "100%",
-//             marginTop: 25,
-//             // paddingTop: 10,
-//             // paddingBottom: 10,
-//             padding: 12,
-//           }}
-//           onClick={handleLogin}
-//         >
-//           Login
-//         </Button>
-//       </Card>
-//     </Container>
-//   );
-// };
-
-// export default Login;
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Card, Button } from "react-bootstrap";
+import { Container, Card, Button, Row, Col } from "react-bootstrap";
 import colors from "../../assets/css/colors.js";
 
 const Login = () => {
@@ -107,8 +8,47 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  // Track window resize for responsive adjustments
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Responsive style calculations
+  const getResponsiveStyles = () => {
+    // Mobile breakpoint
+    const isMobile = windowWidth < 576;
+
+    return {
+      heading: {
+        fontSize: isMobile ? "1.2rem" : "1.5rem",
+        marginBottom: isMobile ? "1rem" : "1.5rem",
+      },
+      input: {
+        padding: isMobile ? "0.6rem" : "0.75rem",
+        marginBottom: isMobile ? "0.8rem" : "1rem",
+        fontSize: isMobile ? "0.9rem" : "1rem",
+      },
+      button: {
+        padding: isMobile ? "0.6rem" : "0.75rem",
+        fontSize: isMobile ? "1rem" : "1.1rem",
+      },
+      error: {
+        fontSize: isMobile ? "0.85rem" : "0.95rem",
+      },
+      card: {
+        padding: isMobile ? "1.5rem 1rem" : "2rem 1.5rem",
+      },
+    };
+  };
+
+  const responsiveStyles = getResponsiveStyles();
 
   const handleLogin = async () => {
+    // Uncomment this for API usage
     // try {
     //   const response = await fetch("https://stage.suniyenetajee.com/api/v1/web/login/", {
     //     method: "POST",
@@ -117,14 +57,10 @@ const Login = () => {
     //     },
     //     body: JSON.stringify({ username: email, password }),
     //   });
-
     //   const data = await response.json();
-
-    //   console.log("response===>", response);
-
     //   if (response.ok) {
     //     localStorage.setItem("auth", "true");
-    //     localStorage.setItem("token", data.token); // Assuming API returns a token
+    //     localStorage.setItem("token", data.token);
     //     navigate("/dashboard");
     //   } else {
     //     setError(data.message || "Invalid credentials. Please try again.");
@@ -132,78 +68,96 @@ const Login = () => {
     // } catch (error) {
     //   setError("Something went wrong. Please try again later.");
     // }
+
     navigate("/dashboard");
   };
 
   return (
     <Container
       fluid
+      className="d-flex justify-content-center align-items-center px-3"
       style={{
         backgroundColor: colors.backgroundColor,
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        minHeight: "100vh",
       }}
     >
-      <Card
-        style={{
-          padding: "30px",
-          borderRadius: "10px",
-          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-          minWidth: "400px",
-          maxWidth: "500px",
-        }}
-      >
-        <h3
-          style={{
-            color: colors.primary_black,
-            textAlign: "center",
-            marginBottom: "25px",
-          }}
-        >
-          Admin Login
-        </h3>
-        {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginBottom: "12px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-          }}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginBottom: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-          }}
-        />
-        <Button
-          style={{
-            backgroundColor: colors.btncolor,
-            borderColor: colors.btncolor,
-            width: "100%",
-            marginTop: 25,
-            padding: 12,
-          }}
-          onClick={handleLogin}
-        >
-          Login
-        </Button>
-      </Card>
+      <Row className="w-100 justify-content-center">
+        <Col xs={12} sm={10} md={6} lg={3}>
+          <Card
+            className="shadow-sm"
+            style={{
+              borderRadius: "1rem",
+              backgroundColor: "#fff",
+              padding: windowWidth < 576 ? "1.5rem 1rem" : "2rem 1.5rem",
+            }}
+          >
+            <h3
+              style={{
+                color: colors.primary_black,
+                textAlign: "center",
+                marginBottom: responsiveStyles.heading.marginBottom,
+                fontSize: responsiveStyles.heading.fontSize,
+              }}
+            >
+              Admin Login
+            </h3>
+
+            {error && (
+              <p
+                style={{
+                  color: "red",
+                  textAlign: "center",
+                  fontSize: responsiveStyles.error.fontSize,
+                }}
+              >
+                {error}
+              </p>
+            )}
+
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{
+                width: "100%",
+                padding: responsiveStyles.input.padding,
+                marginBottom: responsiveStyles.input.marginBottom,
+                border: "1px solid #ccc",
+                borderRadius: "0.5rem",
+                fontSize: responsiveStyles.input.fontSize,
+              }}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{
+                width: "100%",
+                padding: responsiveStyles.input.padding,
+                marginBottom: responsiveStyles.input.marginBottom,
+                border: "1px solid #ccc",
+                borderRadius: "0.5rem",
+                fontSize: responsiveStyles.input.fontSize,
+              }}
+            />
+            <Button
+              style={{
+                backgroundColor: colors.btncolor,
+                borderColor: colors.btncolor,
+                width: "100%",
+                padding: responsiveStyles.button.padding,
+                fontSize: responsiveStyles.button.fontSize,
+                marginTop:15
+              }}
+              onClick={handleLogin}
+            >
+              Login
+            </Button>
+          </Card>
+        </Col>
+      </Row>
     </Container>
   );
 };

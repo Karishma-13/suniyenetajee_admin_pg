@@ -1,13 +1,28 @@
-import React from "react";
-import { Container, Row, Col, Card, Button, Table } from "react-bootstrap";
+import React, { useState } from "react";
+import PostReview from "./PostReview";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Table,
+  Modal,
+  Form,
+} from "react-bootstrap";
 import {
   FiUsers,
   FiShoppingCart,
   FiDollarSign,
   FiTrendingUp,
   FiMoreVertical,
-  FiEdit,
   FiTrash,
+  FiFlag,
+  FiFileText,
+  FiUserCheck,
+  FiUserX,
+  FiClock,
+  FiEdit,
 } from "react-icons/fi";
 import {
   AreaChart,
@@ -24,7 +39,177 @@ import {
 import "../../assets/css/Dashboard.css";
 import { Link } from "react-router-dom";
 
+const initialPosts = [
+  {
+    id: 1,
+    title: "New Policies Announcement",
+    content: "The government has introduced new policies for economic growth.",
+    author: "Sparta",
+    date: "2025-04-01",
+    flagged: false
+  },
+  {
+    id: 2,
+    title: "Healthcare Improvements",
+    content: "New hospitals are being built to improve healthcare facilities.",
+    author: "Tom",
+    date: "2025-04-02",
+    flagged: false
+  },
+  {
+    id: 3,
+    title: "Agricultural Support Scheme",
+    content: "Government launches support scheme for farmers.",
+    author: "Jhon",
+    date: "2025-04-03",
+    flagged: false
+  },
+];
+
 const Dashboard = () => {
+  const [posts, setPosts] = useState(initialPosts);
+  const [showFlagModal, setShowFlagModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showPostDetailModal, setShowPostDetailModal] = useState(false);
+  const [showNewPostModal, setShowNewPostModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedPost, setEditedPost] = useState(null);
+  const [newPost, setNewPost] = useState({
+    title: '',
+    content: '',
+    author: '',
+    category: '',
+    image: '',
+    imageFile: null,
+    imagePreview: ''
+  });
+  const [formErrors, setFormErrors] = useState({});
+  
+  // Handle edit changes
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditedPost(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Save edited post
+  const saveEditedPost = () => {
+    // Update the posts array with the edited post
+    const updatedPosts = posts.map(post => 
+      post.id === editedPost.id ? editedPost : post
+    );
+    
+    setPosts(updatedPosts);
+    setSelectedPost(editedPost);
+    setIsEditMode(false);
+  };
+
+  // Cancel editing
+  const cancelEditing = () => {
+    setEditedPost(selectedPost);
+    setIsEditMode(false);
+  };
+
+  // Enable edit mode
+  const enableEditMode = () => {
+    setEditedPost({...selectedPost});
+    setIsEditMode(true);
+  };
+
+  // Helper function to check if a post is an admin post
+  const isAdminPost = (post) => {
+    return post.author === 'Admin' || post.author === 'Government';
+  };
+  
+  const handleNewPostChange = (e) => {
+    const { name, value } = e.target;
+    setNewPost(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error for this field when user types
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Create a URL for the file for preview
+      const imagePreview = URL.createObjectURL(file);
+      setNewPost(prev => ({
+        ...prev,
+        imageFile: file,
+        imagePreview: imagePreview
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    
+    if (!newPost.title.trim()) {
+      errors.title = 'Title is required';
+    }
+    
+    if (!newPost.category) {
+      errors.category = 'Please select a category';
+    }
+    
+    if (!newPost.content.trim()) {
+      errors.content = 'Content is required';
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleCreatePost = () => {
+    // Validate form before submission
+    if (!validateForm()) {
+      // Reset the button appearance if validation fails
+      const button = document.querySelector('.modal-footer button:last-child');
+      if (button) {
+        button.style.backgroundColor = 'white';
+        button.style.color = 'black'; 
+      }
+      return;
+    }
+    
+    // Create a new post with the form data
+    const post = {
+      id: posts.length + 1,
+      title: newPost.title,
+      content: newPost.content,
+      author: newPost.author || 'Admin', // Default author if not provided
+      date: new Date().toISOString().split('T')[0], // Current date in YYYY-MM-DD format
+      flagged: false,
+      category: newPost.category,
+      image: newPost.imagePreview || newPost.image // Use either uploaded or URL image
+    };
+
+    // Add the new post to the posts array
+    setPosts([...posts, post]);
+    
+    // Reset form and close modal
+    setNewPost({
+      title: '',
+      content: '',
+      author: '',
+      category: '',
+      image: '',
+      imageFile: null,
+      imagePreview: ''
+    });
+    setFormErrors({});
+    setShowNewPostModal(false);
+  };
+
   const statsCards = [
     {
       title: "Total Users",
@@ -37,23 +222,23 @@ const Dashboard = () => {
     {
       title: "Total Posts",
       value: "456",
-      icon: <FiShoppingCart className="stat-icon" />,
+      icon: <FiFileText className="stat-icon" />,
       color: "success",
       increase: true,
       percent: "8%",
     },
     {
-      title: "Revenue",
-      value: "$12,345",
-      icon: <FiDollarSign className="stat-icon" />,
+      title: "Active Users",
+      value: "60%",
+      icon: <FiUserCheck className="stat-icon" />,
       color: "warning",
       increase: false,
       percent: "5%",
     },
     {
-      title: "Growth",
-      value: "+23%",
-      icon: <FiTrendingUp className="stat-icon" />,
+      title: "InActive Users",
+      value: "40%",
+      icon: <FiUserX className="stat-icon" />,
       color: "info",
       increase: true,
       percent: "18%",
@@ -61,55 +246,76 @@ const Dashboard = () => {
   ];
 
   const chartData = [
-    { name: "Jan", uv: 4000, pv: 2400, amt: 2400 },
-    { name: "Feb", uv: 3000, pv: 1398, amt: 2210 },
-    { name: "Mar", uv: 2000, pv: 9800, amt: 2290 },
-    { name: "Apr", uv: 2780, pv: 3908, amt: 2000 },
-    { name: "May", uv: 1890, pv: 4800, amt: 2181 },
-    { name: "Jun", uv: 2390, pv: 3800, amt: 2500 },
-    { name: "Jul", uv: 3490, pv: 4300, amt: 2100 },
+    { name: "Jan", uv: 1500 },
+    { name: "Feb", uv: 1800 },
+    { name: "Mar", uv: 2200 },
+    { name: "Apr", uv: 2800 },
+    { name: "May", uv: 3500 },
+    { name: "Jun", uv: 4500 },
+    { name: "Jul", uv: 5000 },
+    { name: "Aug", uv: 3500 },
+    { name: "Sep", uv: 2500 },
+    { name: "Oct", uv: 1800 },
+    { name: "Nov", uv: 1500 },
+    { name: "Dec", uv: 1500 },
   ];
 
-  const posts = [
-    {
-      id: 1,
-      title: "New Policies Announcement",
-      content:
-        "The government has introduced new policies for economic growth.",
-      author: "Sparta",
-      date: "2025-04-01",
-    },
-    {
-      id: 2,
-      title: "Healthcare Improvements",
-      content:
-        "New hospitals are being built to improve healthcare facilities.",
-      author: "Tom",
-      date: "2025-04-02",
-    },
-    {
-      id: 3,
-      title: "Agricultural Support Scheme",
-      content: "Government launches support scheme for farmers.",
-      author: "Jhon",
-      date: "2025-04-03",
-    },
-  ];
+  const dashboardStyle = {
+    background: "linear-gradient(to bottom, #f8fcf8 0%, #f8fcf8 100%)",
+    minHeight: "100vh",
+    paddingBottom: "2rem",
+  };
 
   return (
-    <Container fluid className="p-4">
-      <h2 className="mb-4 fw-bold">Dashboard</h2>
+    <Container fluid className="p-4" style={dashboardStyle}>
+      <h4 className="mb-4 fw-bold">Suniye Netaji Admin Dashboard</h4>
+      <p style={{ fontSize: "12px", marginTop: "-15px", marginBottom: "20px" }}>
+        Welcome, <span style={{ fontWeight: "bold" }}>Shri Venkateshwara</span>{" "}
+        (Reporter) - Delhi
+      </p>
 
       {/* Stats Cards */}
       <Row className="g-3 mb-4">
         {statsCards.map((stat, index) => (
           <Col key={index} xs={12} sm={6} md={3}>
-            <Card className={`border-0 shadow-sm text-white bg-${stat.color}`}>
+            <Card
+              className={`border-0 shadow-sm bg-white quick-action-card`}
+              style={{
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+              onMouseDown={(e) => e.currentTarget.style.backgroundColor = "#f0f0f0"}
+              onMouseUp={(e) => e.currentTarget.style.backgroundColor = "white"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#f5f5f5"}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = "white"}
+            >
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
-                    <div className="small mb-1">{stat.title}</div>
-                    <h3 className="fw-bold">{stat.value}</h3>
+                    <div
+                      className="small mb-1 fw-bold"
+                      style={{ color: "grey" }}
+                    >
+                      {stat.title}
+                    </div>
+                    <h3
+                      className="fw-bold"
+                      style={{
+                        color:
+                          stat.value === "1,234"
+                            ? "black"
+                            : stat.value === "60%"
+                              ? "#198754" /* Bootstrap success/green color */
+                              : stat.value === "40%"
+                                ? "#dc3545" /* Bootstrap danger/red color */
+                                : stat.value === "24%"
+                                  ? "#dc3545" /* Bootstrap danger/red color */
+                                  : "inherit",
+                      }}
+                    >
+                      {stat.value}
+                    </h3>
                   </div>
                   {stat.icon}
                 </div>
@@ -121,10 +327,10 @@ const Dashboard = () => {
 
       {/* Charts Section */}
       <Row className="g-3 mb-4" style={{ justifyContent: "space-between" }}>
-        <Col xs={12} lg={8}>
+        <Col xs={12} lg={12}>
           <Card className="border-0 shadow-sm">
             <Card.Body>
-              <h5 className="fw-bold">Revenue Overview</h5>
+              <h5 className="fw-bold">User Interactions</h5>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart
                   data={chartData}
@@ -134,25 +340,29 @@ const Dashboard = () => {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
+                  <defs>
+                    <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+                      <stop
+                        offset="95%"
+                        stopColor="#FFFFFF"
+                        stopOpacity={0.3}
+                      />
+                    </linearGradient>
+                  </defs>
                   <Area
                     type="monotone"
                     dataKey="uv"
                     stroke="#8884d8"
-                    fillOpacity={0.3}
-                    fill="#8884d8"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="pv"
-                    stroke="#82ca9d"
-                    fillOpacity={0.3}
-                    fill="#82ca9d"
+                    fillOpacity={1}
+                    fill="url(#colorUv)"
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </Card.Body>
           </Card>
         </Col>
+        {/* Labels section commented out
         <Col xs={12} lg={2}>
           <Card className="border-0 shadow-sm h-100">
             <Card.Body>
@@ -176,6 +386,7 @@ const Dashboard = () => {
             </Card.Body>
           </Card>
         </Col>
+        */}
       </Row>
 
       {/* Manage Posts Section */}
@@ -183,55 +394,633 @@ const Dashboard = () => {
         <Col xs={12}>
           <Card className="border-0 shadow-sm">
             <Card.Body>
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5 className="fw-bold mb-0">Manage Posts</h5>
-                <Link to="/posts">
-                  <Button variant="primary">View All Posts</Button>
-                </Link>
+              <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+                <h5 className="fw-bold mb-0 mb-3 mb-md-0">Manage Posts</h5>
+                <div className="d-flex flex-column flex-sm-row gap-2">
+                  {/* <Link to="/postreview" className="w-100"> */}
+                  <Button
+                    className="w-100"
+                    style={{
+                      border: "1px solid #000",
+                      backgroundColor: "#000",
+                      color: "white",
+                      transition: "all 0.2s ease",
+                    }}
+                    onClick={() => {
+                      setShowNewPostModal(true);
+                      // Reset create button style when modal opens
+                      setTimeout(() => {
+                        const createButton = document.getElementById('createPostButton');
+                        if (createButton) {
+                          createButton.style.backgroundColor = 'white';
+                          createButton.style.color = 'black';
+                        }
+                      }, 50);
+                    }}
+                    onMouseDown={(e) => e.currentTarget.style.backgroundColor = "#000000"}
+                    onMouseUp={(e) => e.currentTarget.style.backgroundColor = "#000000"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#000000"}
+                    onMouseOver={(e) => e.currentTarget.style.opacity = "0.9"}
+                    onMouseOut={(e) => e.currentTarget.style.opacity = "1.0"}
+                  >
+                    + New Post
+                  </Button>
+                  {/* </Link> */}
+                </div>
               </div>
-              <Table striped bordered hover responsive>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Title</th>
-                    <th>Content</th>
-                    <th>Author</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {posts.map((post) => (
-                    <tr key={post.id}>
-                      <td>{post.id}</td>
-                      <td>
-                        {post.title.length > 60
-                          ? post.title.slice(0, 60) + "..."
-                          : post.title}
-                      </td>
-                      <td>
-                        {post.content.length > 60
-                          ? post.content.slice(0, 60) + "..."
-                          : post.content}
-                      </td>
-                      <td>{post.author}</td>
-                      <td>{post.date}</td>
-                      <td>
-                        <Button variant="warning" size="sm" className="me-2">
-                          <FiEdit />
-                        </Button>
-                        <Button variant="danger" size="sm">
-                          <FiTrash />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
+
+              <PostReview posts={posts} setPosts={setPosts} />
             </Card.Body>
           </Card>
         </Col>
       </Row>
+      {/* Flag Warning Modal */}
+      <Modal
+        show={showFlagModal}
+        onHide={() => setShowFlagModal(false)}
+        centered
+        className="custom-modal"
+      >
+        <Modal.Header style={{ position: 'relative', borderBottom: '1px solid #dee2e6', padding: '1rem' }}>
+          <Modal.Title>⚠️ Warning: Inappropriate Content</Modal.Title>
+          <button 
+            type="button" 
+            className="btn-close" 
+            onClick={() => setShowFlagModal(false)}
+            style={{
+              position: 'absolute',
+              right: '1rem',
+              top: '1rem',
+              width: '24px',
+              height: '24px',
+              backgroundColor: '#000',
+              borderRadius: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              opacity: 1.0
+            }}
+          >
+            <span style={{ color: 'white', fontSize: '1.2rem', marginTop: '-2px', marginLeft: '-1px' }}>×</span>
+          </button>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            The post you are flagging contains content that violates our
+            community guidelines.
+          </p>
+          <p>
+            If the user continues to post inappropriate content, their account
+            may be suspended or permanently banned.
+          </p>
+          <p>Please select a reason for flagging this content:</p>
+          <select className="form-select mb-3">
+            <option>Hate speech or discrimination</option>
+            <option>Violence or threatening content</option>
+            <option>Harassment or bullying</option>
+            <option>Misinformation</option>
+            <option>Other (please specify)</option>
+          </select>
+          <p>Do you want to proceed with flagging this post?</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button 
+            variant="secondary" 
+            onClick={() => setShowFlagModal(false)}
+            style={{ backgroundColor: '#000', borderColor: '#000' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              // Handle flag confirmation logic here
+              const updatedPosts = posts.map((p) =>
+                p.id === selectedPost.id ? { ...p, flagged: true } : p
+              );
+              setPosts(updatedPosts);
+              setShowFlagModal(false);
+            }}
+          >
+            Confirm Flag
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        centered
+        className="custom-modal"
+      >
+        <Modal.Header style={{ position: 'relative', borderBottom: '1px solid #dee2e6', padding: '1rem' }}>
+          <Modal.Title>⚠️ Confirm Deletion</Modal.Title>
+          <button 
+            type="button" 
+            className="btn-close" 
+            onClick={() => setShowDeleteModal(false)}
+            style={{
+              position: 'absolute',
+              right: '1rem',
+              top: '1rem',
+              width: '24px',
+              height: '24px',
+              backgroundColor: '#000',
+              borderRadius: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              opacity: 1.0
+            }}
+          >
+            <span style={{ color: 'white', fontSize: '1.2rem', marginTop: '-2px', marginLeft: '-1px' }}>×</span>
+          </button>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Are you sure you want to delete this post?</p>
+          {selectedPost && (
+            <div className="p-3 bg-light rounded mb-3">
+              <h6 className="fw-bold">{selectedPost.title}</h6>
+              <p className="text-muted mb-0 small">{selectedPost.content}</p>
+            </div>
+          )}
+          <p className="text-danger">This action cannot be undone.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button 
+            variant="secondary" 
+            onClick={() => setShowDeleteModal(false)}
+            style={{ backgroundColor: '#000', borderColor: '#000' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              // Handle delete confirmation logic here
+              setPosts(posts.filter((post) => post.id !== selectedPost?.id));
+              setShowDeleteModal(false);
+            }}
+          >
+            Delete Permanently
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Post Detail Modal */}
+      <Modal
+        show={showPostDetailModal}
+        onHide={() => {
+          setShowPostDetailModal(false);
+          setIsEditMode(false);
+        }}
+        centered
+        size="lg"
+        className="custom-modal"
+      >
+        <Modal.Header style={{ position: 'relative', borderBottom: '1px solid #dee2e6', padding: '1rem' }}>
+          <Modal.Title>{isEditMode ? "Edit Post" : "Post Details"}</Modal.Title>
+          <button 
+            type="button" 
+            className="btn-close" 
+            onClick={() => {
+              setShowPostDetailModal(false);
+              setIsEditMode(false);
+            }}
+            style={{
+              position: 'absolute',
+              right: '1rem',
+              top: '1rem',
+              width: '24px',
+              height: '24px',
+              backgroundColor: '#000',
+              borderRadius: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              opacity: 1.0
+            }}
+          >
+            <span style={{ color: 'white', fontSize: '1.2rem', marginTop: '-2px', marginLeft: '-1px' }}>×</span>
+          </button>
+        </Modal.Header>
+        <Modal.Body style={{ maxHeight: "70vh", overflowY: "auto" }}>
+          {selectedPost && (
+            <Card className="border-0 shadow-sm">
+              <div className="d-flex justify-content-center">
+                <div style={{ width: "100%", maxWidth: "18rem" }}>
+                  <Card.Img
+                    variant="top"
+                    src={
+                      selectedPost.title.toLowerCase().includes("healthcare")
+                        ? "https://firsteditionfirstaid.ca/wp-content/uploads/2022/08/An-apple-a-day_-Will-it-really-keep-the-doctor-away-IMAGE.png"
+                        : selectedPost.title
+                          .toLowerCase()
+                          .includes("agricultural")
+                          ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSR7ahvb8aEN76vOIivqeFpa9_gBV5rZm2erw&s"
+                          : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0sCSNq1Leueb3UMTJ1dNwwNqk7gRmeCkUn6C7JoVlgd7pewsg4I8ckmUFedWxsEe6Cxs&usqp=CAU"
+                    }
+                    style={{
+                      height: "auto",
+                      aspectRatio: "16/9",
+                      objectFit: "cover",
+                    }}
+                    className="img-fluid"
+                  />
+                </div>
+              </div>
+              <Card.Body>
+                {isEditMode ? (
+                  // Edit Mode - Show form fields
+                  <Form>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Title</Form.Label>
+                      <Form.Control 
+                        type="text" 
+                        name="title" 
+                        value={editedPost.title}
+                        onChange={handleEditChange}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Category</Form.Label>
+                      <Form.Select 
+                        name="category" 
+                        value={editedPost.category || ''}
+                        onChange={handleEditChange}
+                      >
+                        <option value="">Select Category</option>
+                        <option value="Politics">Politics</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Agriculture">Agriculture</option>
+                        <option value="Education">Education</option>
+                        <option value="Technology">Technology</option>
+                      </Form.Select>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Content</Form.Label>
+                      <Form.Control 
+                        as="textarea" 
+                        rows={5} 
+                        name="content" 
+                        value={editedPost.content}
+                        onChange={handleEditChange}
+                      />
+                    </Form.Group>
+                  </Form>
+                ) : (
+                  // View Mode - Show content
+                  <>
+                    <Card.Title className="fw-bold mb-3">
+                      {selectedPost.title}
+                    </Card.Title>
+                    <div className="mb-3">
+                      {selectedPost.title.toLowerCase().includes("policies") && (
+                        <span className="badge bg-secondary me-2">Politics</span>
+                      )}
+                      {selectedPost.title.toLowerCase().includes("healthcare") && (
+                        <span className="badge bg-info me-2">Healthcare</span>
+                      )}
+                      {selectedPost.title
+                        .toLowerCase()
+                        .includes("agricultural") && (
+                          <span className="badge bg-success me-2">Agriculture</span>
+                        )}
+                      <span className="badge bg-primary">Featured</span>
+                    </div>
+                    <Card.Text className="mb-4">{selectedPost.content}</Card.Text>
+
+                    {/* Additional content */}
+                    <h6 className="fw-bold mt-4">Background Information</h6>
+                    <Card.Text className="mb-4">
+                      This policy announcement comes after months of deliberation
+                      and public consultation. The government has been working on
+                      these reforms since early 2025, with input from various
+                      stakeholders including industry leaders, civil society
+                      organizations, and academic experts.
+                    </Card.Text>
+
+                    <h6 className="fw-bold mt-4">Impact Analysis</h6>
+                    <Card.Text className="mb-4">
+                      Economic experts predict these policies will boost GDP growth
+                      by 2-3% over the next fiscal year. Small businesses are
+                      expected to benefit significantly from tax incentives and
+                      reduced regulatory burdens. However, some sectors may face
+                      adjustment challenges in the short term.
+                    </Card.Text>
+
+                    <h6 className="fw-bold mt-4">Public Reaction</h6>
+                    <Card.Text className="mb-4">
+                      Initial public response has been mixed. A recent poll shows
+                      58% support for the new policies, with stronger approval among
+                      urban residents and younger demographics. Opposition parties
+                      have criticized aspects of the implementation timeline.
+                    </Card.Text>
+                  </>
+                )}
+
+                <div className="d-flex justify-content-between align-items-center mt-4">
+                  <div>
+                    <small className="text-muted d-block">
+                      Posted By {selectedPost.author}
+                    </small>
+                    <small className="text-muted d-block">
+                      Published on {selectedPost.date}
+                    </small>
+                    <small className="text-muted d-block">
+                      Last updated: April 5, 2025
+                    </small>
+                    {isAdminPost(selectedPost) && (
+                      <small className="text-success d-block fw-bold">
+                        Admin Post
+                      </small>
+                    )}
+                  </div>
+                  {!isEditMode && (
+                    <div>
+                      {isAdminPost(selectedPost) && (
+                        <Button 
+                          variant="light" 
+                          size="sm" 
+                          className="me-2"
+                          onClick={enableEditMode}
+                          title="Edit Post"
+                        >
+                          <FiEdit style={{ color: "#000" }} />
+                        </Button>
+                      )}
+                      <Button variant="light" size="sm" className="me-2">
+                        <FiClock style={{ color: "#f0ad4e" }} />
+                      </Button>
+                      <Button
+                        variant={selectedPost.flagged ? "success" : "light"}
+                        size="sm"
+                        className="me-2"
+                        onClick={() => {
+                          if (selectedPost.flagged) {
+                            // If already flagged, unflag directly without showing modal
+                            const updatedPosts = posts.map((p) =>
+                              p.id === selectedPost.id
+                                ? { ...p, flagged: false }
+                                : p
+                            );
+                            setPosts(updatedPosts);
+                          } else {
+                            // If not flagged, show the flag modal
+                            setShowPostDetailModal(false);
+                            setShowFlagModal(true);
+                          }
+                        }}
+                      >
+                        <FiFlag
+                          style={{
+                            color: selectedPost.flagged ? "white" : "black",
+                          }}
+                        />
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => {
+                          setShowPostDetailModal(false);
+                          setShowDeleteModal(true);
+                        }}
+                      >
+                        <FiTrash />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </Card.Body>
+            </Card>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          {isEditMode ? (
+            <>
+              <Button
+                variant="secondary"
+                onClick={cancelEditing}
+                style={{ backgroundColor: '#6c757d', borderColor: '#6c757d' }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={saveEditedPost}
+                style={{ backgroundColor: '#000', borderColor: '#000' }}
+              >
+                Save Changes
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="secondary"
+              onClick={() => setShowPostDetailModal(false)}
+              style={{ backgroundColor: '#000', borderColor: '#000' }}
+            >
+              Close
+            </Button>
+          )}
+        </Modal.Footer>
+      </Modal>
+
+      {/* New Post Modal */}
+      <Modal
+        show={showNewPostModal}
+        onHide={() => setShowNewPostModal(false)}
+        centered
+        size="lg"
+        className="custom-modal"
+      >
+        <Modal.Header style={{ position: 'relative', borderBottom: '1px solid #dee2e6', padding: '1rem' }}>
+          <Modal.Title>Create New Post</Modal.Title>
+          <button 
+            type="button" 
+            className="btn-close" 
+            onClick={() => setShowNewPostModal(false)}
+            style={{
+              position: 'absolute',
+              right: '1rem',
+              top: '1rem',
+              width: '24px',
+              height: '24px',
+              backgroundColor: '#000',
+              borderRadius: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              opacity: 1.0
+            }}
+          >
+            <span style={{ color: 'white', fontSize: '1.2rem', marginTop: '-2px', marginLeft: '-1px' }}>×</span>
+          </button>
+        </Modal.Header>
+        <Modal.Body>
+          <form>
+            <div className="mb-3">
+              <label htmlFor="title" className="form-label">Title <span className="text-danger">*</span></label>
+              <input
+                type="text"
+                className={`form-control ${formErrors.title ? 'is-invalid' : ''}`}
+                id="title"
+                name="title"
+                value={newPost.title}
+                onChange={handleNewPostChange}
+                required
+              />
+              {formErrors.title && <div className="invalid-feedback">{formErrors.title}</div>}
+            </div>
+            <div className="mb-3">
+              <label htmlFor="category" className="form-label">Category <span className="text-danger">*</span></label>
+              <select
+                className={`form-select ${formErrors.category ? 'is-invalid' : ''}`}
+                id="category"
+                name="category"
+                value={newPost.category}
+                onChange={handleNewPostChange}
+                required
+              >
+                <option value="">Select a category</option>
+                <option value="Politics">Politics</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Agriculture">Agriculture</option>
+                <option value="Education">Education</option>
+                <option value="Technology">Technology</option>
+              </select>
+              {formErrors.category && <div className="invalid-feedback">{formErrors.category}</div>}
+            </div>
+            <div className="mb-3">
+              <label htmlFor="content" className="form-label">Content <span className="text-danger">*</span></label>
+              <textarea
+                className={`form-control ${formErrors.content ? 'is-invalid' : ''}`}
+                id="content"
+                name="content"
+                rows="6"
+                value={newPost.content}
+                onChange={handleNewPostChange}
+                required
+              ></textarea>
+              {formErrors.content && <div className="invalid-feedback">{formErrors.content}</div>}
+            </div>
+            <div className="mb-3">
+              <label htmlFor="author" className="form-label">Author</label>
+              <input
+                type="text"
+                className="form-control"
+                id="author"
+                name="author"
+                value={newPost.author}
+                onChange={handleNewPostChange}
+                placeholder="Your name (defaults to Admin if left blank)"
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Featured Image</label>
+              <div className="row">
+                <div className="col-md-6">
+                  <div className="mb-3">
+                    <label htmlFor="imageFile" className="form-label">Upload from device</label>
+                    <input
+                      type="file"
+                      className="form-control"
+                      id="imageFile"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                    />
+                    <div className="form-text">Select image from your device</div>
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="mb-3">
+                    <label htmlFor="image" className="form-label">Or use image URL</label>
+                    <input
+                      type="url"
+                      className="form-control"
+                      id="image"
+                      name="image"
+                      value={newPost.image}
+                      onChange={handleNewPostChange}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                    <div className="form-text">Enter a direct link to an image</div>
+                  </div>
+                </div>
+              </div>
+              {(newPost.imagePreview || newPost.image) && (
+                <div className="mt-2 text-center border p-2">
+                  <p className="mb-2 fw-bold">Image Preview</p>
+                  <img
+                    src={newPost.imagePreview || newPost.image}
+                    alt="Preview"
+                    className="img-fluid"
+                    style={{ maxHeight: "200px", objectFit: "cover" }}
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                    onLoad={(e) => { e.target.style.display = 'block'; }}
+                  />
+                </div>
+              )}
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button 
+            variant="secondary" 
+            onClick={() => setShowNewPostModal(false)}
+            style={{ backgroundColor: '#000', borderColor: '#000' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            id="createPostButton"
+            style={{
+              backgroundColor: 'white',
+              color: 'black',
+              borderColor: '#000',
+              borderWidth: '1px',
+              transition: 'all 0.2s ease'
+            }}
+            onClick={(e) => {
+              const button = e.currentTarget;
+              // Change to black background with white text for visual feedback
+              button.style.backgroundColor = '#000';
+              button.style.color = 'white';
+              
+              // Process the form after a small delay for visual feedback
+              setTimeout(() => {
+                handleCreatePost();
+              }, 150);
+            }}
+            onMouseOver={(e) => {
+              // Only change background on hover if not already clicked
+              if (e.currentTarget.style.color !== 'white') {
+                e.currentTarget.style.backgroundColor = '#f5f5f5';
+              }
+            }}
+            onMouseOut={(e) => {
+              // Only reset on mouse out if not already clicked
+              if (e.currentTarget.style.color !== 'white') {
+                e.currentTarget.style.backgroundColor = 'white';
+              }
+            }}
+          >
+            Create Post
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
