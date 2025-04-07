@@ -395,7 +395,7 @@ const PostReview = ({
                       ) : (
                         filteredPosts().map((post, index) => (
                         <tr key={post.id}>
-                            <td style={{ verticalAlign: "middle" }}>{index + 1}</td>
+                            <td style={{ verticalAlign: "middle" }}>{(currentPage - 1) * 10 + index + 1}</td>
                           <td
                             onClick={() => {
                               setSelectedPost(post);
