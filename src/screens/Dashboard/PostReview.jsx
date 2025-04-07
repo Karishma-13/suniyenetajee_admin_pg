@@ -639,7 +639,7 @@ const PostReview = ({
                                       size="sm"
                                       className="me-1"
                                       onClick={() => handleApprovePost(post.id)}
-                                      disabled={approvingPostId === post.id}
+                                      disabled={approvingPostId === post.id || isPostApproved(post.id)}
                                     >
                                       {approvingPostId === post.id ? (
                                         <Spinner
@@ -1373,7 +1373,7 @@ const PostReview = ({
                         size="sm"
                         className="me-1"
                         onClick={() => handleApprovePost(selectedPost.id)}
-                        disabled={approvingPostId === selectedPost.id}
+                        disabled={approvingPostId === selectedPost.id || isPostApproved(selectedPost.id)}
                       >
                         {approvingPostId === selectedPost.id ? (
                           <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
