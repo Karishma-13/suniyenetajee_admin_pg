@@ -109,7 +109,7 @@ const PostReview = ({
   const confirmFlag = () => {
     console.log("confirmFlag called with selectedPost:", selectedPost);
     if (!selectedPost) return;
-    
+
     // Create a new array with the updated post
     const updatedPosts = posts.map(p => {
       if (p.id === selectedPost.id) {
@@ -118,10 +118,10 @@ const PostReview = ({
       }
       return p;
     });
-    
+
     console.log("Posts before update:", posts);
     console.log("Updated posts after flag:", updatedPosts);
-    
+
     // Update the posts state
     setPosts(updatedPosts);
     setShowFlagModal(false);
@@ -320,21 +320,21 @@ const PostReview = ({
   // Determine timer color based on post creation date
   const getTimerColor = (dateString) => {
     if (!dateString) return "#28a745"; // Default green if no date
-    
+
     try {
       const postDate = new Date(dateString);
-      
+
       // Check if the date is valid
       if (isNaN(postDate.getTime())) {
         console.error(`Invalid date format: ${dateString}`);
         return "#28a745"; // Default to green for invalid dates
       }
-      
+
       const now = new Date();
       const diffHours = (now - postDate) / (1000 * 60 * 60);
-      
+
       console.log(`Post date: ${dateString}, Diff hours: ${diffHours}`);
-      
+
       if (diffHours > 24) {
         return "#dc3545"; // Red for posts older than 24 hours
       } else if (diffHours > 10) {
@@ -351,11 +351,11 @@ const PostReview = ({
   // Filter posts based on active filter
   const filteredPosts = () => {
     let filtered = [];
-    
+
     console.log("Current active filter:", activeFilter);
     console.log("All posts:", posts);
     console.log("Flagged posts:", posts.filter(post => post.flagged === true));
-    
+
     switch (activeFilter) {
       case "flagged":
         filtered = posts.filter(post => post.flagged === true);
@@ -373,14 +373,14 @@ const PostReview = ({
       default:
         filtered = posts; // Show all posts by default
     }
-    
+
     // Sort posts by date_created (oldest first)
     const sortedPosts = filtered.sort((a, b) => {
       const dateA = new Date(a.date_created);
       const dateB = new Date(b.date_created);
       return dateA - dateB; // Ascending order (oldest first)
     });
-    
+
     console.log("Final filtered and sorted posts:", sortedPosts);
     return sortedPosts;
   };
@@ -396,7 +396,7 @@ const PostReview = ({
   const handleFlagButtonClick = (post) => {
     console.log("Flag button clicked for post:", post);
     console.log("Current flagged state:", post.flagged);
-    
+
     if (post.flagged) {
       // If already flagged, unflag directly
       console.log("Unflagging post:", post.id);
@@ -443,10 +443,10 @@ const PostReview = ({
                   <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center p-3">
                     <h5 className="fw-bold mb-0 mb-3 mb-md-0">
                       {activeFilter === "all" ? "Manage Posts" :
-                       activeFilter === "review" ? "Under Review Posts" :
-                       activeFilter === "flagged" ? "Flagged Posts" :
-                       activeFilter === "approved" ? "Approved Posts" :
-                       "Manage Posts"}
+                        activeFilter === "review" ? "Under Review Posts" :
+                          activeFilter === "flagged" ? "Flagged Posts" :
+                            activeFilter === "approved" ? "Approved Posts" :
+                              "Manage Posts"}
                     </h5>
                     <div className="d-flex flex-column flex-sm-row gap-2">
                       <Button
@@ -478,7 +478,7 @@ const PostReview = ({
                       </Button>
                     </div>
                   </div>
-                  
+
                   {/* Add filter buttons at the top */}
                   <div className="d-flex justify-content-between align-items-center p-3">
                     <div className="d-flex align-items-center gap-2">
@@ -519,13 +519,13 @@ const PostReview = ({
                   </div>
 
                   <div className="p-3">
-                    <div style={{ 
-                      borderRadius: "5px", 
+                    <div style={{
+                      borderRadius: "5px",
                       overflow: "hidden",
                       border: "1px solid #e0e0e0",
                       boxShadow: "none"
                     }}>
-                      <Table hover responsive className="mb-0" style={{ 
+                      <Table hover responsive className="mb-0" style={{
                         border: "none",
                         margin: 0
                       }}>
@@ -600,7 +600,7 @@ const PostReview = ({
                                     >
                                       {!getUserAvatar(post) && (
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#6c757d" className="bi bi-person" viewBox="0 0 16 16" style={{ display: "block" }}>
-                                          <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                                          <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z" />
                                         </svg>
                                       )}
                                     </div>
@@ -622,7 +622,7 @@ const PostReview = ({
                                           const diffMs = now - postDate;
                                           const diffHours = diffMs / (1000 * 60 * 60);
                                           const diffMinutes = diffMs / (1000 * 60);
-                                          
+
                                           if (diffHours >= 24) {
                                             const days = Math.floor(diffHours / 24);
                                             return `${days} day${days > 1 ? 's' : ''}`;
@@ -1021,9 +1021,9 @@ const PostReview = ({
       >
         <Modal.Header style={{ position: 'relative', borderBottom: '1px solid #dee2e6', padding: '1rem' }}>
           <Modal.Title>⚠️ Warning: Inappropriate Content</Modal.Title>
-          <button 
-            type="button" 
-            className="btn-close" 
+          <button
+            type="button"
+            className="btn-close"
             onClick={() => setShowFlagModal(false)}
             style={{
               position: 'absolute',
@@ -1065,8 +1065,8 @@ const PostReview = ({
           <p>Do you want to proceed with flagging this post?</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             onClick={() => setShowFlagModal(false)}
             style={{ backgroundColor: '#000', borderColor: '#000' }}
           >
@@ -1099,9 +1099,9 @@ const PostReview = ({
       >
         <Modal.Header style={{ position: 'relative', borderBottom: '1px solid #dee2e6', padding: '1rem' }}>
           <Modal.Title>⚠️ Confirm Deletion</Modal.Title>
-          <button 
-            type="button" 
-            className="btn-close" 
+          <button
+            type="button"
+            className="btn-close"
             onClick={() => setShowDeleteModal(false)}
             style={{
               position: 'absolute',
@@ -1134,8 +1134,8 @@ const PostReview = ({
           <p className="text-danger">This action cannot be undone.</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             onClick={() => setShowDeleteModal(false)}
             style={{ backgroundColor: '#000', borderColor: '#000' }}
           >
@@ -1167,9 +1167,9 @@ const PostReview = ({
       >
         <Modal.Header style={{ position: 'relative', borderBottom: '1px solid #dee2e6', padding: '1rem' }}>
           <Modal.Title>{isEditMode ? "Edit Post" : "Post Details"}</Modal.Title>
-          <button 
-            type="button" 
-            className="btn-close" 
+          <button
+            type="button"
+            className="btn-close"
             onClick={() => {
               setShowPostDetailModal(false);
               setIsEditMode(false);
@@ -1198,23 +1198,23 @@ const PostReview = ({
           {selectedPost && (
             <Card className="border-0 shadow-sm">
               {selectedPost.image ? (
-              <div className="d-flex justify-content-center">
-                <div style={{ width: "100%", maxWidth: "18rem" }}>
-                  <Card.Img
-                    variant="top"
+                <div className="d-flex justify-content-center">
+                  <div style={{ width: "100%", maxWidth: "18rem" }}>
+                    <Card.Img
+                      variant="top"
                       src={selectedPost.image}
-                    style={{
-                      height: "auto",
-                      aspectRatio: "16/9",
-                      objectFit: "cover",
-                    }}
-                    className="img-fluid"
+                      style={{
+                        height: "auto",
+                        aspectRatio: "16/9",
+                        objectFit: "cover",
+                      }}
+                      className="img-fluid"
                       onError={(e) => {
                         e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
                       }}
-                  />
+                    />
+                  </div>
                 </div>
-              </div>
               ) : (
                 <div className="d-flex justify-content-center">
                   <div
@@ -1276,15 +1276,15 @@ const PostReview = ({
                 ) : (
                   // View Mode - Show content
                   <>
-                <Card.Title className="fw-bold mb-3">
+                    <Card.Title className="fw-bold mb-3">
                       {selectedPost.title || "No Title"}
-                </Card.Title>
-                <div className="mb-3">
+                    </Card.Title>
+                    <div className="mb-3">
                       <span className="badge bg-primary me-2">User Post</span>
                       {isAdminPost(selectedPost) && (
                         <span className="badge bg-success me-2">Admin Post</span>
                       )}
-                </div>
+                    </div>
                     <Card.Text className="mb-4">{selectedPost.content || "No content"}</Card.Text>
 
                     {/* Additional content - commented out
@@ -1300,9 +1300,9 @@ const PostReview = ({
                   <div>
                     <small className="text-muted d-block">
                       <div className="d-flex align-items-center">
-                        <div 
-                          className="rounded-circle me-2 overflow-hidden" 
-                          style={{ 
+                        <div
+                          className="rounded-circle me-2 overflow-hidden"
+                          style={{
                             width: "32px",
                             height: "32px",
                             backgroundSize: "cover",
@@ -1318,7 +1318,7 @@ const PostReview = ({
                         >
                           {!getUserAvatar(selectedPost) && (
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#6c757d" className="bi bi-person" viewBox="0 0 16 16" style={{ display: "block" }}>
-                              <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                              <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z" />
                             </svg>
                           )}
                         </div>
@@ -1335,7 +1335,7 @@ const PostReview = ({
                             const diffMs = now - postDate;
                             const diffHours = diffMs / (1000 * 60 * 60);
                             const diffMinutes = diffMs / (1000 * 60);
-                            
+
                             if (diffHours >= 24) {
                               const days = Math.floor(diffHours / 24);
                               return `${days} day${days > 1 ? 's' : ''}`;
@@ -1362,18 +1362,18 @@ const PostReview = ({
                     ) : null}
                   </div>
                   {!isEditMode && (
-                  <div>
-                    {isAdminPost(selectedPost) && (
-                      <Button 
-                        variant="light" 
-                        size="sm" 
-                        className="me-1"
+                    <div>
+                      {isAdminPost(selectedPost) && (
+                        <Button
+                          variant="light"
+                          size="sm"
+                          className="me-1"
                           onClick={enableEditMode}
-                        title="Edit Post"
-                      >
-                        <FiEdit style={{ color: "#000" }} />
-                      </Button>
-                    )}
+                          title="Edit Post"
+                        >
+                          <FiEdit style={{ color: "#000" }} />
+                        </Button>
+                      )}
                       <Button
                         variant={isPostApproved(selectedPost.id) ? "success" : "light"}
                         size="sm"
@@ -1386,42 +1386,42 @@ const PostReview = ({
                         ) : (
                           <FaCheck style={{ color: isPostApproved(selectedPost.id) ? "white" : "#6c757d" }} />
                         )}
-                    </Button>
-                    <Button
-                      variant={selectedPost.flagged ? "success" : "light"}
-                      size="sm"
-                      className="me-1"
-                      onClick={() => {
-                        if (selectedPost.flagged) {
-                          // If already flagged, unflag directly
-                          const updatedPosts = posts.map((p) =>
-                            p.id === selectedPost.id ? { ...p, flagged: false } : p
-                          );
-                          setPosts(updatedPosts);
-                        } else {
-                          // If not flagged, show the flag modal
-                          setShowPostDetailModal(false);
-                          setShowFlagModal(true);
-                        }
-                      }}
-                    >
-                      <FiFlag
-                        style={{
-                          color: selectedPost.flagged ? "white" : "black",
+                      </Button>
+                      <Button
+                        variant={selectedPost.flagged ? "success" : "light"}
+                        size="sm"
+                        className="me-1"
+                        onClick={() => {
+                          if (selectedPost.flagged) {
+                            // If already flagged, unflag directly
+                            const updatedPosts = posts.map((p) =>
+                              p.id === selectedPost.id ? { ...p, flagged: false } : p
+                            );
+                            setPosts(updatedPosts);
+                          } else {
+                            // If not flagged, show the flag modal
+                            setShowPostDetailModal(false);
+                            setShowFlagModal(true);
+                          }
                         }}
-                      />
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => {
-                        setShowPostDetailModal(false);
-                        setShowDeleteModal(true);
-                      }}
-                    >
-                      <FiTrash />
-                    </Button>
-                  </div>
+                      >
+                        <FiFlag
+                          style={{
+                            color: selectedPost.flagged ? "white" : "black",
+                          }}
+                        />
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => {
+                          setShowPostDetailModal(false);
+                          setShowDeleteModal(true);
+                        }}
+                      >
+                        <FiTrash />
+                      </Button>
+                    </div>
                   )}
                 </div>
               </Card.Body>
@@ -1447,13 +1447,13 @@ const PostReview = ({
               </Button>
             </>
           ) : (
-          <Button
-            variant="secondary"
-            onClick={() => setShowPostDetailModal(false)}
-            style={{ backgroundColor: '#000', borderColor: '#000' }}
-          >
-            Close
-          </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setShowPostDetailModal(false)}
+              style={{ backgroundColor: '#000', borderColor: '#000' }}
+            >
+              Close
+            </Button>
           )}
         </Modal.Footer>
       </Modal>
@@ -1468,9 +1468,9 @@ const PostReview = ({
       >
         <Modal.Header style={{ position: 'relative', borderBottom: '1px solid #dee2e6', padding: '1rem' }}>
           <Modal.Title>Create New Post</Modal.Title>
-          <button 
-            type="button" 
-            className="btn-close" 
+          <button
+            type="button"
+            className="btn-close"
             onClick={() => setShowNewPostModal(false)}
             style={{
               position: 'absolute',
@@ -1573,8 +1573,8 @@ const PostReview = ({
           </form>
         </Modal.Body>
         <Modal.Footer>
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             onClick={() => setShowNewPostModal(false)}
             style={{ backgroundColor: '#000', borderColor: '#000' }}
           >
@@ -1594,7 +1594,7 @@ const PostReview = ({
               // Change to black background with white text for visual feedback
               button.style.backgroundColor = '#000';
               button.style.color = 'white';
-              
+
               // Process the form after a small delay for visual feedback
               setTimeout(() => {
                 // Here you would add the logic to create a new post

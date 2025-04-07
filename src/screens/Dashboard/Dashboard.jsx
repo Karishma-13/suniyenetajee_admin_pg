@@ -93,55 +93,55 @@ const Dashboard = () => {
   });
   const [formErrors, setFormErrors] = useState({});
   const [activeFilter, setActiveFilter] = useState("all");
-  
+
   useEffect(() => {
     // Fetch posts from API
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        
+
         // Use hardcoded token directly
         const headers = {
           'Authorization': 'Token 7b257e1452f1115b0c70f80a1d54ccd8615aa52c'
         };
-        
+
         // Determine which API endpoint to use based on activeFilter
         let apiUrl;
         let allPosts = [];
         let totalCount = 0;
-        
+
         if (activeFilter === "all") {
           // Fetch both pending and approved posts
           const [pendingResponse, approvedResponse] = await Promise.all([
             fetch(`https://stage.suniyenetajee.com/api/v1/web/posts/?status=pending&page=${currentPage}&ordering=date_created&page_size=10`, { headers }),
             fetch(`https://stage.suniyenetajee.com/api/v1/web/posts/?status=approved&page=${currentPage}&ordering=date_created&page_size=10`, { headers })
           ]);
-          
+
           if (!pendingResponse.ok || !approvedResponse.ok) {
             throw new Error(`HTTP error! Status: ${pendingResponse.status} or ${approvedResponse.status}`);
           }
-          
+
           const pendingData = await pendingResponse.json();
           const approvedData = await approvedResponse.json();
-          
+
           console.log('Pending Posts API Response:', {
             count: pendingData.count,
             results: pendingData.results,
             next: pendingData.next,
             previous: pendingData.previous
           });
-          
+
           console.log('Approved Posts API Response:', {
             count: approvedData.count,
             results: approvedData.results,
             next: approvedData.next,
             previous: approvedData.previous
           });
-          
+
           // Combine the results
           allPosts = [...pendingData.results, ...approvedData.results];
           totalCount = pendingData.count + approvedData.count;
-          
+
           // Set approved post IDs
           const approvedPostIds = approvedData.results.map(post => post.id);
           setApprovedPosts(approvedPostIds);
@@ -150,37 +150,37 @@ const Dashboard = () => {
           // Use the specific filter
           const status = activeFilter === "approved" ? "approved" : "pending";
           apiUrl = `https://stage.suniyenetajee.com/api/v1/web/posts/?status=${status}&page=${currentPage}&ordering=date_created&page_size=10`;
-          
+
           console.log('Fetching posts from:', apiUrl);
-          
+
           const response = await fetch(apiUrl, { headers });
-          
+
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
-          
+
           const data = await response.json();
-          
+
           console.log('Posts API Response:', {
             count: data.count,
             results: data.results,
             next: data.next,
             previous: data.previous
           });
-          
+
           allPosts = data.results;
           totalCount = data.count;
-          
+
           if (status === "approved") {
             const approvedPostIds = data.results.map(post => post.id);
             setApprovedPosts(approvedPostIds);
             console.log('Approved Post IDs:', approvedPostIds);
           }
         }
-        
+
         setTotalPosts(totalCount);
         setTotalPages(Math.ceil(totalCount / 10));
-        
+
         const formattedPosts = allPosts.map(post => ({
           id: post.id,
           title: post.description || "No title",
@@ -193,7 +193,7 @@ const Dashboard = () => {
           authorImage: post.created_by.picture ? `https://stage.suniyenetajee.com${post.created_by.picture}` : null,
           isApproved: post.status === "approved"
         }));
-        
+
         console.log('Formatted Posts:', formattedPosts);
         setPosts(formattedPosts);
       } catch (err) {
@@ -203,7 +203,7 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-    
+
     console.log(`Fetching data for page ${currentPage} with filter ${activeFilter}`);
     fetchPosts();
   }, [currentPage, activeFilter]);
@@ -220,10 +220,10 @@ const Dashboard = () => {
   // Save edited post
   const saveEditedPost = () => {
     // Update the posts array with the edited post
-    const updatedPosts = posts.map(post => 
+    const updatedPosts = posts.map(post =>
       post.id === editedPost.id ? editedPost : post
     );
-    
+
     setPosts(updatedPosts);
     setSelectedPost(editedPost);
     setIsEditMode(false);
@@ -237,7 +237,7 @@ const Dashboard = () => {
 
   // Enable edit mode
   const enableEditMode = () => {
-    setEditedPost({...selectedPost});
+    setEditedPost({ ...selectedPost });
     setIsEditMode(true);
   };
 
@@ -246,14 +246,14 @@ const Dashboard = () => {
     // For now, no posts are considered admin posts until we have an admin flag
     return false; // Will be updated when admin flag is available in API
   };
-  
+
   const handleNewPostChange = (e) => {
     const { name, value } = e.target;
     setNewPost(prev => ({
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error for this field when user types
     if (formErrors[name]) {
       setFormErrors(prev => ({ ...prev, [name]: '' }));
@@ -275,19 +275,19 @@ const Dashboard = () => {
 
   const validateForm = () => {
     const errors = {};
-    
+
     if (!newPost.title.trim()) {
       errors.title = 'Title is required';
     }
-    
+
     if (!newPost.category) {
       errors.category = 'Please select a category';
     }
-    
+
     if (!newPost.content.trim()) {
       errors.content = 'Content is required';
     }
-    
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -299,11 +299,11 @@ const Dashboard = () => {
       const button = document.querySelector('.modal-footer button:last-child');
       if (button) {
         button.style.backgroundColor = 'white';
-        button.style.color = 'black'; 
+        button.style.color = 'black';
       }
       return;
     }
-    
+
     // Create a new post with the form data
     const post = {
       id: posts.length + 1,
@@ -318,7 +318,7 @@ const Dashboard = () => {
 
     // Add the new post to the posts array
     setPosts([...posts, post]);
-    
+
     // Reset form and close modal
     setNewPost({
       title: '',
@@ -520,8 +520,8 @@ const Dashboard = () => {
           {error}
         </div>
       ) : (
-        <PostReview 
-          posts={posts} 
+        <PostReview
+          posts={posts}
           setPosts={handlePostsUpdate}
           currentPage={currentPage}
           totalPages={totalPages}
@@ -543,9 +543,9 @@ const Dashboard = () => {
       >
         <Modal.Header style={{ position: 'relative', borderBottom: '1px solid #dee2e6', padding: '1rem' }}>
           <Modal.Title>⚠️ Warning: Inappropriate Content</Modal.Title>
-          <button 
-            type="button" 
-            className="btn-close" 
+          <button
+            type="button"
+            className="btn-close"
             onClick={() => setShowFlagModal(false)}
             style={{
               position: 'absolute',
@@ -587,8 +587,8 @@ const Dashboard = () => {
           <p>Do you want to proceed with flagging this post?</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             onClick={() => setShowFlagModal(false)}
             style={{ backgroundColor: '#000', borderColor: '#000' }}
           >
@@ -619,9 +619,9 @@ const Dashboard = () => {
       >
         <Modal.Header style={{ position: 'relative', borderBottom: '1px solid #dee2e6', padding: '1rem' }}>
           <Modal.Title>⚠️ Confirm Deletion</Modal.Title>
-          <button 
-            type="button" 
-            className="btn-close" 
+          <button
+            type="button"
+            className="btn-close"
             onClick={() => setShowDeleteModal(false)}
             style={{
               position: 'absolute',
@@ -654,8 +654,8 @@ const Dashboard = () => {
           <p className="text-danger">This action cannot be undone.</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             onClick={() => setShowDeleteModal(false)}
             style={{ backgroundColor: '#000', borderColor: '#000' }}
           >
@@ -687,9 +687,9 @@ const Dashboard = () => {
       >
         <Modal.Header style={{ position: 'relative', borderBottom: '1px solid #dee2e6', padding: '1rem' }}>
           <Modal.Title>{isEditMode ? "Edit Post" : "Post Details"}</Modal.Title>
-          <button 
-            type="button" 
-            className="btn-close" 
+          <button
+            type="button"
+            className="btn-close"
             onClick={() => {
               setShowPostDetailModal(false);
               setIsEditMode(false);
@@ -737,17 +737,17 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="d-flex justify-content-center">
-                  <div 
-                    style={{ 
-                      width: "100%", 
-                      maxWidth: "18rem", 
-                      height: "200px", 
-                      background: "#f8f9fa", 
-                      border: "1px dashed #dee2e6", 
-                      display: "flex", 
-                      alignItems: "center", 
+                  <div
+                    style={{
+                      width: "100%",
+                      maxWidth: "18rem",
+                      height: "200px",
+                      background: "#f8f9fa",
+                      border: "1px dashed #dee2e6",
+                      display: "flex",
+                      alignItems: "center",
                       justifyContent: "center",
-                      borderRadius: "4px" 
+                      borderRadius: "4px"
                     }}
                   >
                     <span className="text-muted">No Media</span>
@@ -760,17 +760,17 @@ const Dashboard = () => {
                   <Form>
                     <Form.Group className="mb-3">
                       <Form.Label>Title</Form.Label>
-                      <Form.Control 
-                        type="text" 
-                        name="title" 
+                      <Form.Control
+                        type="text"
+                        name="title"
                         value={editedPost.title}
                         onChange={handleEditChange}
                       />
                     </Form.Group>
                     <Form.Group className="mb-3">
                       <Form.Label>Category</Form.Label>
-                      <Form.Select 
-                        name="category" 
+                      <Form.Select
+                        name="category"
                         value={editedPost.category || ''}
                         onChange={handleEditChange}
                       >
@@ -784,10 +784,10 @@ const Dashboard = () => {
                     </Form.Group>
                     <Form.Group className="mb-3">
                       <Form.Label>Content</Form.Label>
-                      <Form.Control 
-                        as="textarea" 
-                        rows={5} 
-                        name="content" 
+                      <Form.Control
+                        as="textarea"
+                        rows={5}
+                        name="content"
                         value={editedPost.content}
                         onChange={handleEditChange}
                       />
@@ -864,9 +864,9 @@ const Dashboard = () => {
                   {!isEditMode && (
                     <div>
                       {isAdminPost(selectedPost) && (
-                        <Button 
-                          variant="light" 
-                          size="sm" 
+                        <Button
+                          variant="light"
+                          size="sm"
                           className="me-2"
                           onClick={enableEditMode}
                           title="Edit Post"
@@ -960,9 +960,9 @@ const Dashboard = () => {
       >
         <Modal.Header style={{ position: 'relative', borderBottom: '1px solid #dee2e6', padding: '1rem' }}>
           <Modal.Title>Create New Post</Modal.Title>
-          <button 
-            type="button" 
-            className="btn-close" 
+          <button
+            type="button"
+            className="btn-close"
             onClick={() => setShowNewPostModal(false)}
             style={{
               position: 'absolute',
@@ -1092,8 +1092,8 @@ const Dashboard = () => {
           </form>
         </Modal.Body>
         <Modal.Footer>
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             onClick={() => setShowNewPostModal(false)}
             style={{ backgroundColor: '#000', borderColor: '#000' }}
           >
@@ -1113,7 +1113,7 @@ const Dashboard = () => {
               // Change to black background with white text for visual feedback
               button.style.backgroundColor = '#000';
               button.style.color = 'white';
-              
+
               // Process the form after a small delay for visual feedback
               setTimeout(() => {
                 handleCreatePost();

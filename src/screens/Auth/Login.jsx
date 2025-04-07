@@ -57,16 +57,16 @@ const Login = () => {
         },
         body: JSON.stringify({ username: email, password }),
       });
-      
+
       // Log the raw response status and headers
       console.log('Login API Response Status:', response.status);
       console.log('Login API Response Headers:', Object.fromEntries([...response.headers.entries()]));
-      
+
       const data = await response.json();
-      
+
       // Log the parsed response data
       console.log('Login API Response Data:', data);
-      
+
       if (response.ok) {
         localStorage.setItem("auth", "true");
         localStorage.setItem("token", data.token);
@@ -159,7 +159,7 @@ const Login = () => {
                 width: "100%",
                 padding: responsiveStyles.button.padding,
                 fontSize: responsiveStyles.button.fontSize,
-                marginTop:15
+                marginTop: 15
               }}
               onClick={handleLogin}
             >

@@ -186,8 +186,8 @@
   color: white !important;
 }
 
-.btn-black:hover, 
-.btn-black:focus, 
+.btn-black:hover,
+.btn-black:focus,
 .btn-black:active {
   background-color: #000 !important;
   border-color: #000 !important;
@@ -208,7 +208,7 @@ button:focus {
 }
 
 /* Table Styles */
-table.table td, 
+table.table td,
 table.table th {
   vertical-align: middle !important;
 }
