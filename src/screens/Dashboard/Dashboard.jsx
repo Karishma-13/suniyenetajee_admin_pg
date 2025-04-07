@@ -92,7 +92,7 @@ const Dashboard = () => {
     imagePreview: ''
   });
   const [formErrors, setFormErrors] = useState({});
-  const [activeFilter, setActiveFilter] = useState("pending");
+  const [activeFilter, setActiveFilter] = useState("all");
   
   useEffect(() => {
     // Fetch posts from API
@@ -106,62 +106,98 @@ const Dashboard = () => {
         };
         
         // Determine which API endpoint to use based on activeFilter
-        const status = activeFilter === "approved" ? "approved" : "pending";
-        const apiUrl = `https://stage.suniyenetajee.com/api/v1/web/posts/?status=${status}&page=${currentPage}&ordering=date_created&page_size=10`;
+        let apiUrl;
+        let allPosts = [];
+        let totalCount = 0;
         
-        console.log('Fetching approved posts from:', apiUrl);
-        
-        const response = await fetch(apiUrl, { headers });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+        if (activeFilter === "all") {
+          // Fetch both pending and approved posts
+          const [pendingResponse, approvedResponse] = await Promise.all([
+            fetch(`https://stage.suniyenetajee.com/api/v1/web/posts/?status=pending&page=${currentPage}&ordering=date_created&page_size=10`, { headers }),
+            fetch(`https://stage.suniyenetajee.com/api/v1/web/posts/?status=approved&page=${currentPage}&ordering=date_created&page_size=10`, { headers })
+          ]);
+          
+          if (!pendingResponse.ok || !approvedResponse.ok) {
+            throw new Error(`HTTP error! Status: ${pendingResponse.status} or ${approvedResponse.status}`);
+          }
+          
+          const pendingData = await pendingResponse.json();
+          const approvedData = await approvedResponse.json();
+          
+          console.log('Pending Posts API Response:', {
+            count: pendingData.count,
+            results: pendingData.results,
+            next: pendingData.next,
+            previous: pendingData.previous
+          });
+          
+          console.log('Approved Posts API Response:', {
+            count: approvedData.count,
+            results: approvedData.results,
+            next: approvedData.next,
+            previous: approvedData.previous
+          });
+          
+          // Combine the results
+          allPosts = [...pendingData.results, ...approvedData.results];
+          totalCount = pendingData.count + approvedData.count;
+          
+          // Set approved post IDs
+          const approvedPostIds = approvedData.results.map(post => post.id);
+          setApprovedPosts(approvedPostIds);
+          console.log('Approved Post IDs:', approvedPostIds);
+        } else {
+          // Use the specific filter
+          const status = activeFilter === "approved" ? "approved" : "pending";
+          apiUrl = `https://stage.suniyenetajee.com/api/v1/web/posts/?status=${status}&page=${currentPage}&ordering=date_created&page_size=10`;
+          
+          console.log('Fetching posts from:', apiUrl);
+          
+          const response = await fetch(apiUrl, { headers });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          
+          console.log('Posts API Response:', {
+            count: data.count,
+            results: data.results,
+            next: data.next,
+            previous: data.previous
+          });
+          
+          allPosts = data.results;
+          totalCount = data.count;
+          
+          if (status === "approved") {
+            const approvedPostIds = data.results.map(post => post.id);
+            setApprovedPosts(approvedPostIds);
+            console.log('Approved Post IDs:', approvedPostIds);
+          }
         }
         
-        const data = await response.json();
+        setTotalPosts(totalCount);
+        setTotalPages(Math.ceil(totalCount / 10));
         
-        console.log('Approved Posts API Response:', {
-          count: data.count,
-          results: data.results,
-          next: data.next,
-          previous: data.previous
-        });
-        
-        data.results.forEach((post, index) => {
-          console.log(`Approved Post ${index + 1}:`, {
-            id: post.id,
-            date_created: post.date_created,
-            description: post.description,
-            created_by: post.created_by,
-            media: post.media
-          });
-        });
-        
-        setTotalPosts(data.count);
-        setTotalPages(Math.ceil(data.count / 10));
-        
-        const formattedPosts = data.results.map(post => ({
+        const formattedPosts = allPosts.map(post => ({
           id: post.id,
           title: post.description || "No title",
           content: post.description || "No content",
           author: post.created_by.full_name,
           date: new Date(post.date_created).toISOString().split('T')[0],
           date_created: post.date_created,
-          flagged: false,
+          flagged: post.flagged || false,
           image: post.media.length > 0 ? `https://stage.suniyenetajee.com${post.media[0].media}` : null,
           authorImage: post.created_by.picture ? `https://stage.suniyenetajee.com${post.created_by.picture}` : null,
-          isApproved: status === "approved"
+          isApproved: post.status === "approved"
         }));
         
-        console.log('Formatted Approved Posts:', formattedPosts);
+        console.log('Formatted Posts:', formattedPosts);
         setPosts(formattedPosts);
-        
-        if (status === "approved") {
-          const approvedPostIds = data.results.map(post => post.id);
-          setApprovedPosts(approvedPostIds);
-          console.log('Approved Post IDs:', approvedPostIds);
-        }
       } catch (err) {
-        console.error("Error fetching approved posts:", err);
+        console.error("Error fetching posts:", err);
         setError("Failed to load posts. Please try again later.");
       } finally {
         setLoading(false);
@@ -307,8 +343,8 @@ const Dashboard = () => {
 
   // Add this function to handle filter changes
   const handleFilterChange = (filter) => {
+    console.log("Dashboard: Changing filter to:", filter);
     setActiveFilter(filter);
-    setCurrentPage(1); // Reset to first page when changing filters
   };
 
   const statsCards = [
@@ -365,6 +401,12 @@ const Dashboard = () => {
     background: "linear-gradient(to bottom, #f8fcf8 0%, #f8fcf8 100%)",
     minHeight: "100vh",
     paddingBottom: "2rem",
+  };
+
+  // Add a handler for post updates
+  const handlePostsUpdate = (updatedPosts) => {
+    console.log("Dashboard: Updating posts:", updatedPosts);
+    setPosts(updatedPosts);
   };
 
   return (
@@ -480,7 +522,7 @@ const Dashboard = () => {
       ) : (
         <PostReview 
           posts={posts} 
-          setPosts={setPosts} 
+          setPosts={handlePostsUpdate}
           currentPage={currentPage}
           totalPages={totalPages}
           totalPosts={totalPosts}

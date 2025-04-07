@@ -101,15 +101,31 @@ const PostReview = ({
   };
 
   const handleFlag = (post) => {
+    console.log("handleFlag called with post:", post);
     setSelectedPost(post);
     setShowFlagModal(true);
   };
 
   const confirmFlag = () => {
-    if (!selectedPost) return; // Prevents errors if no post is selected
-    setPosts(posts.filter((post) => post.id !== selectedPost.id));
+    console.log("confirmFlag called with selectedPost:", selectedPost);
+    if (!selectedPost) return;
+    
+    // Create a new array with the updated post
+    const updatedPosts = posts.map(p => {
+      if (p.id === selectedPost.id) {
+        console.log("Updating post:", p.id, "with flagged: true");
+        return { ...p, flagged: true };
+      }
+      return p;
+    });
+    
+    console.log("Posts before update:", posts);
+    console.log("Updated posts after flag:", updatedPosts);
+    
+    // Update the posts state
+    setPosts(updatedPosts);
     setShowFlagModal(false);
-    setSelectedPost(null); // Reset selected post
+    setSelectedPost(null);
   };
 
   // Handle edit changes
@@ -336,9 +352,14 @@ const PostReview = ({
   const filteredPosts = () => {
     let filtered = [];
     
+    console.log("Current active filter:", activeFilter);
+    console.log("All posts:", posts);
+    console.log("Flagged posts:", posts.filter(post => post.flagged === true));
+    
     switch (activeFilter) {
       case "flagged":
-        filtered = posts.filter(post => post.flagged);
+        filtered = posts.filter(post => post.flagged === true);
+        console.log("Filtered flagged posts:", filtered);
         break;
       case "review":
         filtered = posts.filter(post => !isPostApproved(post.id) && !post.flagged);
@@ -346,16 +367,50 @@ const PostReview = ({
       case "approved":
         filtered = posts.filter(post => isPostApproved(post.id));
         break;
+      case "pending":
+        filtered = posts.filter(post => !isPostApproved(post.id));
+        break;
       default:
         filtered = posts; // Show all posts by default
     }
     
     // Sort posts by date_created (oldest first)
-    return filtered.sort((a, b) => {
+    const sortedPosts = filtered.sort((a, b) => {
       const dateA = new Date(a.date_created);
       const dateB = new Date(b.date_created);
       return dateA - dateB; // Ascending order (oldest first)
     });
+    
+    console.log("Final filtered and sorted posts:", sortedPosts);
+    return sortedPosts;
+  };
+
+  // Add this function to get the current filtered posts
+  const getCurrentFilteredPosts = () => {
+    const filtered = filteredPosts();
+    console.log("Getting current filtered posts:", filtered);
+    return filtered;
+  };
+
+  // Update the flag button click handler
+  const handleFlagButtonClick = (post) => {
+    console.log("Flag button clicked for post:", post);
+    console.log("Current flagged state:", post.flagged);
+    
+    if (post.flagged) {
+      // If already flagged, unflag directly
+      console.log("Unflagging post:", post.id);
+      const updatedPosts = posts.map((p) =>
+        p.id === post.id ? { ...p, flagged: false } : p
+      );
+      console.log("Updated posts after unflag:", updatedPosts);
+      setPosts(updatedPosts);
+    } else {
+      // If not flagged, show the flag modal
+      console.log("Setting selected post for flag modal:", post);
+      setSelectedPost(post);
+      setShowFlagModal(true);
+    }
   };
 
   return (
@@ -480,12 +535,12 @@ const PostReview = ({
                           </tr>
                         </thead>
                         <tbody>
-                          {posts.length === 0 ? (
+                          {getCurrentFilteredPosts().length === 0 ? (
                             <tr>
                               <td colSpan="7" className="text-center py-4">No posts available</td>
                             </tr>
                           ) : (
-                            posts.map((post, index) => (
+                            getCurrentFilteredPosts().map((post, index) => (
                               <tr key={post.id}>
                                 <td style={{ verticalAlign: "middle", borderRight: "1px solid #e0e0e0", borderBottom: "1px solid #e0e0e0" }}>{(currentPage - 1) * 10 + index + 1}</td>
                                 <td
@@ -604,21 +659,7 @@ const PostReview = ({
                                       variant={post.flagged ? "success" : "light"}
                                       size="sm"
                                       className="me-1"
-                                      onClick={() => {
-                                        if (post.flagged) {
-                                          // If already flagged, unflag directly without showing modal
-                                          const updatedPosts = posts.map((p) =>
-                                            p.id === post.id
-                                              ? { ...p, flagged: false }
-                                              : p
-                                          );
-                                          setPosts(updatedPosts);
-                                        } else {
-                                          // If not flagged, show the flag modal
-                                          setSelectedPost(post);
-                                          setShowFlagModal(true);
-                                        }
-                                      }}
+                                      onClick={() => handleFlagButtonClick(post)}
                                     >
                                       <FiFlag
                                         style={{
@@ -647,10 +688,10 @@ const PostReview = ({
                   </div>
 
                   {/* Pagination - Always show when there are posts */}
-                  {posts.length > 0 && (
+                  {getCurrentFilteredPosts().length > 0 && (
                     <div className="d-flex flex-column align-items-center mt-5 mb-3">
                       <div className="text-muted small">
-                        Showing page {currentPage} of {totalPages} (Total posts: {totalPosts})
+                        Showing page {currentPage} of {totalPages} (Total posts per page: {getCurrentFilteredPosts().length})
                       </div>
                       <Pagination className="mb-5">
                         {renderPaginationItems()}
@@ -1028,10 +1069,12 @@ const PostReview = ({
           <Button
             variant="danger"
             onClick={() => {
+              console.log("Confirm flag clicked for post:", selectedPost);
               // Handle flag confirmation logic here
               const updatedPosts = posts.map((p) =>
                 p.id === selectedPost.id ? { ...p, flagged: true } : p
               );
+              console.log("Updated posts after flag:", updatedPosts);
               setPosts(updatedPosts);
               setShowFlagModal(false);
             }}
@@ -1344,15 +1387,11 @@ const PostReview = ({
                       className="me-1"
                       onClick={() => {
                         if (selectedPost.flagged) {
-                          // If already flagged, unflag directly without showing modal
+                          // If already flagged, unflag directly
                           const updatedPosts = posts.map((p) =>
-                            p.id === selectedPost.id
-                              ? { ...p, flagged: false }
-                              : p
+                            p.id === selectedPost.id ? { ...p, flagged: false } : p
                           );
                           setPosts(updatedPosts);
-                          // This ensures the selectedPost state also gets updated
-                            setSelectedPost({ ...selectedPost, flagged: false });
                         } else {
                           // If not flagged, show the flag modal
                           setShowPostDetailModal(false);
