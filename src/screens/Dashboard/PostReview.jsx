@@ -477,17 +477,17 @@ const PostReview = ({
                   <div className="d-flex justify-content-between align-items-center p-3">
                     <div className="d-flex align-items-center gap-2">
                       <Button
-                        variant={activeFilter === "pending" ? "primary" : "outline-primary"}
+                        variant={activeFilter === "all" ? "primary" : "outline-primary"}
                         size="sm"
-                        onClick={() => onFilterChange("pending")}
+                        onClick={() => onFilterChange("all")}
                         style={{
-                          borderColor: activeFilter === "pending" ? "#000" : "#000",
-                          backgroundColor: activeFilter === "pending" ? "#000" : "transparent",
-                          color: activeFilter === "pending" ? "white" : "#000",
+                          borderColor: activeFilter === "all" ? "#000" : "#000",
+                          backgroundColor: activeFilter === "all" ? "#000" : "transparent",
+                          color: activeFilter === "all" ? "white" : "#000",
                           transition: "all 0.2s ease"
                         }}
                       >
-                        <FaClock style={{ marginRight: "5px", color: activeFilter === "pending" ? "white" : "#000" }} />
+                        <FaClock style={{ marginRight: "5px", color: activeFilter === "all" ? "white" : "#000" }} />
                         All Posts
                       </Button>
                       <Button
