@@ -86,6 +86,7 @@ const PostReview = ({
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedPost, setEditedPost] = useState(null);
   const [approvingPostId, setApprovingPostId] = useState(null);
+  const [showNewPostModal, setShowNewPostModal] = useState(false);
 
   const navigate = useNavigate();
 
@@ -383,8 +384,42 @@ const PostReview = ({
             <Col xs={12}>
               <Card className="border-0 shadow-sm">
                 <Card.Body className="p-0">
+                  {/* Manage Posts Header */}
+                  <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center p-3">
+                    <h5 className="fw-bold mb-0 mb-3 mb-md-0">Manage Posts</h5>
+                    <div className="d-flex flex-column flex-sm-row gap-2">
+                      <Button
+                        className="w-100"
+                        style={{
+                          border: "1px solid #000",
+                          backgroundColor: "#000",
+                          color: "white",
+                          transition: "all 0.2s ease",
+                        }}
+                        onClick={() => {
+                          setShowNewPostModal(true);
+                          // Reset create button style when modal opens
+                          setTimeout(() => {
+                            const createButton = document.getElementById('createPostButton');
+                            if (createButton) {
+                              createButton.style.backgroundColor = 'white';
+                              createButton.style.color = 'black';
+                            }
+                          }, 50);
+                        }}
+                        onMouseDown={(e) => e.currentTarget.style.backgroundColor = "#000000"}
+                        onMouseUp={(e) => e.currentTarget.style.backgroundColor = "#000000"}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#000000"}
+                        onMouseOver={(e) => e.currentTarget.style.opacity = "0.9"}
+                        onMouseOut={(e) => e.currentTarget.style.opacity = "1.0"}
+                      >
+                        + New Post
+                      </Button>
+                    </div>
+                  </div>
+                  
                   {/* Add filter buttons at the top */}
-                  <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div className="d-flex justify-content-between align-items-center p-3">
                     <div className="d-flex align-items-center gap-2">
                       <Button
                         variant={activeFilter === "pending" ? "primary" : "outline-primary"}
@@ -422,190 +457,202 @@ const PostReview = ({
                     </div>
                   </div>
 
-                  <Table bordered hover responsive className="mb-0 table-aligned-with-header">
-                    <thead>
-                      <tr>
-                        <th style={{ width: "5%" }}>S.No.</th>
-                        <th style={{ width: "20%" }}>Content</th>
-                        <th style={{ width: "10%" }}>Media</th>
-                        <th style={{ width: "15%" }}>Author</th>
-                        <th style={{ width: "12%" }}>Date</th>
-                        <th style={{ width: "8%" }}>Status</th>
-                        <th style={{ width: "10%" }}>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredPosts().length === 0 ? (
-                        <tr>
-                          <td colSpan="7" className="text-center py-4">No posts available</td>
-                        </tr>
-                      ) : (
-                        filteredPosts().map((post, index) => (
-                        <tr key={post.id}>
-                            <td style={{ verticalAlign: "middle" }}>{(currentPage - 1) * 10 + index + 1}</td>
-                          <td
-                            onClick={() => {
-                              setSelectedPost(post);
-                              setShowPostDetailModal(true);
-                            }}
-                            style={{ cursor: "pointer", verticalAlign: "middle" }}
-                          >
-                              {post.title?.length > 60
-                              ? post.title.slice(0, 60) + "..."
-                                : post.title || "No content"}
-                          </td>
-                          <td
-                            onClick={() => {
-                              setSelectedPost(post);
-                              setShowPostDetailModal(true);
-                            }}
-                            style={{ cursor: "pointer", verticalAlign: "middle" }}
-                          >
-                              {post.image ? (
-                                <img
-                                  src={post.image}
-                                  alt="Post media"
-                                  style={{ height: "50px", width: "80px", objectFit: "cover" }}
-                                  onError={(e) => {
-                                    e.target.src = "https://via.placeholder.com/80x50?text=No+Image";
+                  <div className="p-3">
+                    <div style={{ 
+                      borderRadius: "5px", 
+                      overflow: "hidden",
+                      border: "1px solid #e0e0e0",
+                      boxShadow: "none"
+                    }}>
+                      <Table hover responsive className="mb-0" style={{ 
+                        border: "none",
+                        margin: 0
+                      }}>
+                        <thead>
+                          <tr>
+                            <th style={{ width: "5%", borderTop: "none", borderRight: "1px solid #e0e0e0", borderBottom: "1px solid #e0e0e0" }}>S.No.</th>
+                            <th style={{ width: "20%", borderTop: "none", borderRight: "1px solid #e0e0e0", borderBottom: "1px solid #e0e0e0" }}>Content</th>
+                            <th style={{ width: "10%", borderTop: "none", borderRight: "1px solid #e0e0e0", borderBottom: "1px solid #e0e0e0" }}>Media</th>
+                            <th style={{ width: "15%", borderTop: "none", borderRight: "1px solid #e0e0e0", borderBottom: "1px solid #e0e0e0" }}>Author</th>
+                            <th style={{ width: "12%", borderTop: "none", borderRight: "1px solid #e0e0e0", borderBottom: "1px solid #e0e0e0" }}>Date</th>
+                            <th style={{ width: "8%", borderTop: "none", borderRight: "1px solid #e0e0e0", borderBottom: "1px solid #e0e0e0" }}>Status</th>
+                            <th style={{ width: "10%", borderTop: "none", borderBottom: "1px solid #e0e0e0" }}>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {posts.length === 0 ? (
+                            <tr>
+                              <td colSpan="7" className="text-center py-4">No posts available</td>
+                            </tr>
+                          ) : (
+                            posts.map((post, index) => (
+                              <tr key={post.id}>
+                                <td style={{ verticalAlign: "middle", borderRight: "1px solid #e0e0e0", borderBottom: "1px solid #e0e0e0" }}>{(currentPage - 1) * 10 + index + 1}</td>
+                                <td
+                                  onClick={() => {
+                                    setSelectedPost(post);
+                                    setShowPostDetailModal(true);
                                   }}
-                                />
-                              ) : (
-                                <span className="text-muted">No media</span>
-                              )}
-                          </td>
-                          <td style={{ verticalAlign: "middle" }}>
-                            <div className="d-flex align-items-center">
-                              <div
-                                className="rounded-circle me-2 overflow-hidden"
-                                style={{
-                                    width: "32px",
-                                    height: "32px",
-                                  backgroundSize: "cover",
-                                  backgroundPosition: "center",
-                                    backgroundImage: getUserAvatar(post) ? `url(${getUserAvatar(post)})` : "none",
-                                    backgroundColor: getUserAvatar(post) ? "transparent" : "#e9ecef",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    border: "1px solid #dee2e6",
-                                    boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+                                  style={{ cursor: "pointer", verticalAlign: "middle", borderRight: "1px solid #e0e0e0", borderBottom: "1px solid #e0e0e0" }}
+                                >
+                                  {post.title?.length > 60
+                                    ? post.title.slice(0, 60) + "..."
+                                    : post.title || "No content"}
+                                </td>
+                                <td
+                                  onClick={() => {
+                                    setSelectedPost(post);
+                                    setShowPostDetailModal(true);
                                   }}
+                                  style={{ cursor: "pointer", verticalAlign: "middle", borderRight: "1px solid #e0e0e0", borderBottom: "1px solid #e0e0e0" }}
                                 >
-                                  {!getUserAvatar(post) && (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#6c757d" className="bi bi-person" viewBox="0 0 16 16" style={{ display: "block" }}>
-                                      <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
-                                    </svg>
-                                  )}
-                                </div>
-                                {post.author || "Unknown"}
-                            </div>
-                          </td>
-                          <td style={{ verticalAlign: "middle" }}>{post.date}</td>
-                            <td style={{ verticalAlign: "middle" }}>
-                              <div className="d-flex justify-content-start">
-                                {post.flagged ? (
-                                  <span className="badge bg-danger">Flagged</span>
-                                ) : isPostApproved(post.id) ? (
-                                  <span className="badge bg-success">Approved</span>
-                                ) : (
-                                  <span className="small" style={{ color: getTimerColor(post.date_created) }}>
-                                    {(() => {
-                                      const postDate = new Date(post.date_created);
-                                      const now = new Date();
-                                      const diffMs = now - postDate;
-                                      const diffHours = diffMs / (1000 * 60 * 60);
-                                      const diffMinutes = diffMs / (1000 * 60);
-                                      
-                                      if (diffHours >= 24) {
-                                        const days = Math.floor(diffHours / 24);
-                                        return `${days} day${days > 1 ? 's' : ''}`;
-                                      } else if (diffHours >= 1) {
-                                        const hours = Math.floor(diffHours);
-                                        return `${hours} hr${hours > 1 ? 's' : ''}`;
-                                      } else {
-                                        const minutes = Math.floor(diffMinutes);
-                                        return `${minutes} min${minutes > 1 ? 's' : ''}`;
-                                      }
-                                    })()}
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                          <td style={{ verticalAlign: "middle" }}>
-                            <div className="post-actions d-flex justify-content-center align-items-center">
-                                <Button
-                                  variant="light"
-                                  size="sm"
-                                  className="me-1"
-                                  onClick={() => handleApprovePost(post.id)}
-                                  disabled={approvingPostId === post.id}
-                                >
-                                  {approvingPostId === post.id ? (
-                                    <Spinner
-                                      as="span"
-                                      animation="border"
-                                      size="sm"
-                                      role="status"
-                                      aria-hidden="true"
+                                  {post.image ? (
+                                    <img
+                                      src={post.image}
+                                      alt="Post media"
+                                      style={{ height: "50px", width: "80px", objectFit: "cover" }}
+                                      onError={(e) => {
+                                        e.target.src = "https://via.placeholder.com/80x50?text=No+Image";
+                                      }}
                                     />
                                   ) : (
-                                    <FaCheck style={{
-                                      color: isPostApproved(post.id) ? "#28a745" : "#6c757d"
-                                    }} />
+                                    <span className="text-muted">No media</span>
                                   )}
-                              </Button>
-                              <Button
-                                variant={post.flagged ? "success" : "light"}
-                                size="sm"
-                                className="me-1"
-                                onClick={() => {
-                                  if (post.flagged) {
-                                    // If already flagged, unflag directly without showing modal
-                                    const updatedPosts = posts.map((p) =>
-                                      p.id === post.id
-                                        ? { ...p, flagged: false }
-                                        : p
-                                    );
-                                    setPosts(updatedPosts);
-                                  } else {
-                                    // If not flagged, show the flag modal
-                                    setSelectedPost(post);
-                                    setShowFlagModal(true);
-                                  }
-                                }}
-                              >
-                                <FiFlag
-                                  style={{
-                                    color: post.flagged ? "white" : "black",
-                                  }}
-                                />
-                              </Button>
-                              <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedPost(post);
-                                  setShowDeleteModal(true);
-                                }}
-                              >
-                                <FiTrash />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </Table>
+                                </td>
+                                <td style={{ verticalAlign: "middle", borderRight: "1px solid #e0e0e0", borderBottom: "1px solid #e0e0e0" }}>
+                                  <div className="d-flex align-items-center">
+                                    <div
+                                      className="rounded-circle me-2 overflow-hidden"
+                                      style={{
+                                        width: "32px",
+                                        height: "32px",
+                                        backgroundSize: "cover",
+                                        backgroundPosition: "center",
+                                        backgroundImage: getUserAvatar(post) ? `url(${getUserAvatar(post)})` : "none",
+                                        backgroundColor: getUserAvatar(post) ? "transparent" : "#e9ecef",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        border: "1px solid #dee2e6",
+                                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+                                      }}
+                                    >
+                                      {!getUserAvatar(post) && (
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#6c757d" className="bi bi-person" viewBox="0 0 16 16" style={{ display: "block" }}>
+                                          <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                                        </svg>
+                                      )}
+                                    </div>
+                                    {post.author || "Unknown"}
+                                  </div>
+                                </td>
+                                <td style={{ verticalAlign: "middle", borderRight: "1px solid #e0e0e0", borderBottom: "1px solid #e0e0e0" }}>{post.date}</td>
+                                <td style={{ verticalAlign: "middle", borderRight: "1px solid #e0e0e0", borderBottom: "1px solid #e0e0e0" }}>
+                                  <div className="d-flex justify-content-start">
+                                    {post.flagged ? (
+                                      <span className="badge bg-danger">Flagged</span>
+                                    ) : isPostApproved(post.id) ? (
+                                      <span className="badge bg-success">Approved</span>
+                                    ) : (
+                                      <span className="small" style={{ color: getTimerColor(post.date_created) }}>
+                                        {(() => {
+                                          const postDate = new Date(post.date_created);
+                                          const now = new Date();
+                                          const diffMs = now - postDate;
+                                          const diffHours = diffMs / (1000 * 60 * 60);
+                                          const diffMinutes = diffMs / (1000 * 60);
+                                          
+                                          if (diffHours >= 24) {
+                                            const days = Math.floor(diffHours / 24);
+                                            return `${days} day${days > 1 ? 's' : ''}`;
+                                          } else if (diffHours >= 1) {
+                                            const hours = Math.floor(diffHours);
+                                            return `${hours} hr${hours > 1 ? 's' : ''}`;
+                                          } else {
+                                            const minutes = Math.floor(diffMinutes);
+                                            return `${minutes} min${minutes > 1 ? 's' : ''}`;
+                                          }
+                                        })()}
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td style={{ verticalAlign: "middle", borderBottom: "1px solid #e0e0e0" }}>
+                                  <div className="post-actions d-flex justify-content-center align-items-center">
+                                    <Button
+                                      variant="light"
+                                      size="sm"
+                                      className="me-1"
+                                      onClick={() => handleApprovePost(post.id)}
+                                      disabled={approvingPostId === post.id}
+                                    >
+                                      {approvingPostId === post.id ? (
+                                        <Spinner
+                                          as="span"
+                                          animation="border"
+                                          size="sm"
+                                          role="status"
+                                          aria-hidden="true"
+                                        />
+                                      ) : (
+                                        <FaCheck style={{
+                                          color: isPostApproved(post.id) ? "#28a745" : "#6c757d"
+                                        }} />
+                                      )}
+                                    </Button>
+                                    <Button
+                                      variant={post.flagged ? "success" : "light"}
+                                      size="sm"
+                                      className="me-1"
+                                      onClick={() => {
+                                        if (post.flagged) {
+                                          // If already flagged, unflag directly without showing modal
+                                          const updatedPosts = posts.map((p) =>
+                                            p.id === post.id
+                                              ? { ...p, flagged: false }
+                                              : p
+                                          );
+                                          setPosts(updatedPosts);
+                                        } else {
+                                          // If not flagged, show the flag modal
+                                          setSelectedPost(post);
+                                          setShowFlagModal(true);
+                                        }
+                                      }}
+                                    >
+                                      <FiFlag
+                                        style={{
+                                          color: post.flagged ? "white" : "black",
+                                        }}
+                                      />
+                                    </Button>
+                                    <Button
+                                      variant="danger"
+                                      size="sm"
+                                      onClick={() => {
+                                        setSelectedPost(post);
+                                        setShowDeleteModal(true);
+                                      }}
+                                    >
+                                      <FiTrash />
+                                    </Button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </Table>
+                    </div>
+                  </div>
 
                   {/* Pagination - Always show when there are posts */}
                   {posts.length > 0 && (
-                    <div className="d-flex flex-column align-items-center mt-4 mb-3 p-3">
-                      <div className="text-muted mb-2">
+                    <div className="d-flex flex-column align-items-center mt-5 mb-3">
+                      <div className="text-muted small">
                         Showing page {currentPage} of {totalPages} (Total posts: {totalPosts})
                       </div>
-                      <Pagination className="mb-0">
+                      <Pagination className="mb-5">
                         {renderPaginationItems()}
                       </Pagination>
                     </div>
@@ -1363,6 +1410,167 @@ const PostReview = ({
             Close
           </Button>
           )}
+        </Modal.Footer>
+      </Modal>
+
+      {/* New Post Modal */}
+      <Modal
+        show={showNewPostModal}
+        onHide={() => setShowNewPostModal(false)}
+        centered
+        size="lg"
+        className="custom-modal"
+      >
+        <Modal.Header style={{ position: 'relative', borderBottom: '1px solid #dee2e6', padding: '1rem' }}>
+          <Modal.Title>Create New Post</Modal.Title>
+          <button 
+            type="button" 
+            className="btn-close" 
+            onClick={() => setShowNewPostModal(false)}
+            style={{
+              position: 'absolute',
+              right: '1rem',
+              top: '1rem',
+              width: '24px',
+              height: '24px',
+              backgroundColor: '#000000',
+              borderRadius: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              opacity: 1.0
+            }}
+          >
+            <span style={{ color: 'white', fontSize: '1.2rem', marginTop: '-2px', marginLeft: '-1px' }}>×</span>
+          </button>
+        </Modal.Header>
+        <Modal.Body>
+          <form>
+            <div className="mb-3">
+              <label htmlFor="title" className="form-label">Title <span className="text-danger">*</span></label>
+              <input
+                type="text"
+                className="form-control"
+                id="title"
+                name="title"
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="category" className="form-label">Category <span className="text-danger">*</span></label>
+              <select
+                className="form-select"
+                id="category"
+                name="category"
+                required
+              >
+                <option value="">Select a category</option>
+                <option value="Politics">Politics</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Agriculture">Agriculture</option>
+                <option value="Education">Education</option>
+                <option value="Technology">Technology</option>
+              </select>
+            </div>
+            <div className="mb-3">
+              <label htmlFor="content" className="form-label">Content <span className="text-danger">*</span></label>
+              <textarea
+                className="form-control"
+                id="content"
+                name="content"
+                rows="6"
+                required
+              ></textarea>
+            </div>
+            <div className="mb-3">
+              <label htmlFor="author" className="form-label">Author</label>
+              <input
+                type="text"
+                className="form-control"
+                id="author"
+                name="author"
+                placeholder="Your name (defaults to Admin if left blank)"
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Featured Image</label>
+              <div className="row">
+                <div className="col-md-6">
+                  <div className="mb-3">
+                    <label htmlFor="imageFile" className="form-label">Upload from device</label>
+                    <input
+                      type="file"
+                      className="form-control"
+                      id="imageFile"
+                      accept="image/*"
+                    />
+                    <div className="form-text">Select image from your device</div>
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="mb-3">
+                    <label htmlFor="image" className="form-label">Or use image URL</label>
+                    <input
+                      type="url"
+                      className="form-control"
+                      id="image"
+                      name="image"
+                      placeholder="https://example.com/image.jpg"
+                    />
+                    <div className="form-text">Enter a direct link to an image</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button 
+            variant="secondary" 
+            onClick={() => setShowNewPostModal(false)}
+            style={{ backgroundColor: '#000', borderColor: '#000' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            id="createPostButton"
+            style={{
+              backgroundColor: 'white',
+              color: 'black',
+              borderColor: '#000',
+              borderWidth: '1px',
+              transition: 'all 0.2s ease'
+            }}
+            onClick={(e) => {
+              const button = e.currentTarget;
+              // Change to black background with white text for visual feedback
+              button.style.backgroundColor = '#000';
+              button.style.color = 'white';
+              
+              // Process the form after a small delay for visual feedback
+              setTimeout(() => {
+                // Here you would add the logic to create a new post
+                setShowNewPostModal(false);
+              }, 150);
+            }}
+            onMouseOver={(e) => {
+              // Only change background on hover if not already clicked
+              if (e.currentTarget.style.color !== 'white') {
+                e.currentTarget.style.backgroundColor = '#f5f5f5';
+              }
+            }}
+            onMouseOut={(e) => {
+              // Only reset on mouse out if not already clicked
+              if (e.currentTarget.style.color !== 'white') {
+                e.currentTarget.style.backgroundColor = 'white';
+              }
+            }}
+          >
+            Create Post
+          </Button>
         </Modal.Footer>
       </Modal>
     </Container>

@@ -463,100 +463,35 @@ const Dashboard = () => {
             </Card.Body>
           </Card>
         </Col>
-        {/* Labels section commented out
-        <Col xs={12} lg={2}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Body>
-              <h5 className="fw-bold mb-3">Labels</h5>
-              <div className="d-flex flex-wrap gap-2">
-                {[
-                  "God label",
-                  "Dummy God label",
-                  "Managers",
-                  "Manager",
-                  "Reporter",
-                ].map((label, idx) => (
-                  <span
-                    key={idx}
-                    className="badge bg-secondary px-3 py-2 text-capitalize"
-                  >
-                    {label}
-                  </span>
-                ))}
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        */}
       </Row>
 
-      {/* Manage Posts Section */}
-      <Row className="g-3">
-        <Col xs={12}>
-          <Card className="border-0 shadow-sm">
-            <Card.Body>
-              <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
-                <h5 className="fw-bold mb-0 mb-3 mb-md-0">Manage Posts</h5>
-                <div className="d-flex flex-column flex-sm-row gap-2">
-                  <Button
-                    className="w-100"
-                    style={{
-                      border: "1px solid #000",
-                      backgroundColor: "#000",
-                      color: "white",
-                      transition: "all 0.2s ease",
-                    }}
-                    onClick={() => {
-                      setShowNewPostModal(true);
-                      // Reset create button style when modal opens
-                      setTimeout(() => {
-                        const createButton = document.getElementById('createPostButton');
-                        if (createButton) {
-                          createButton.style.backgroundColor = 'white';
-                          createButton.style.color = 'black';
-                        }
-                      }, 50);
-                    }}
-                    onMouseDown={(e) => e.currentTarget.style.backgroundColor = "#000000"}
-                    onMouseUp={(e) => e.currentTarget.style.backgroundColor = "#000000"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#000000"}
-                    onMouseOver={(e) => e.currentTarget.style.opacity = "0.9"}
-                    onMouseOut={(e) => e.currentTarget.style.opacity = "1.0"}
-                  >
-                    + New Post
-                  </Button>
-                </div>
-              </div>
+      {/* Post Review Section */}
+      {loading ? (
+        <div className="text-center p-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="mt-3">Loading posts...</p>
+        </div>
+      ) : error ? (
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      ) : (
+        <PostReview 
+          posts={posts} 
+          setPosts={setPosts} 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalPosts={totalPosts}
+          approvedPosts={approvedPosts}
+          setApprovedPosts={setApprovedPosts}
+          onPageChange={handlePageChange}
+          activeFilter={activeFilter}
+          onFilterChange={handleFilterChange}
+        />
+      )}
 
-              {loading ? (
-                <div className="text-center p-5">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  <p className="mt-3">Loading posts...</p>
-                </div>
-              ) : error ? (
-                <div className="alert alert-danger" role="alert">
-                  {error}
-                </div>
-              ) : (
-                <PostReview 
-                  posts={posts} 
-                  setPosts={setPosts} 
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  totalPosts={totalPosts}
-                  approvedPosts={approvedPosts}
-                  setApprovedPosts={setApprovedPosts}
-                  onPageChange={handlePageChange}
-                  activeFilter={activeFilter}
-                  onFilterChange={handleFilterChange}
-                />
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
       {/* Flag Warning Modal */}
       <Modal
         show={showFlagModal}
