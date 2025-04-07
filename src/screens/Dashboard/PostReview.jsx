@@ -441,7 +441,13 @@ const PostReview = ({
                 <Card.Body className="p-0">
                   {/* Manage Posts Header */}
                   <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center p-3">
-                    <h5 className="fw-bold mb-0 mb-3 mb-md-0">Manage Posts</h5>
+                    <h5 className="fw-bold mb-0 mb-3 mb-md-0">
+                      {activeFilter === "all" ? "Manage Posts" :
+                       activeFilter === "review" ? "Under Review Posts" :
+                       activeFilter === "flagged" ? "Flagged Posts" :
+                       activeFilter === "approved" ? "Approved Posts" :
+                       "Manage Posts"}
+                    </h5>
                     <div className="d-flex flex-column flex-sm-row gap-2">
                       <Button
                         className="w-100"
