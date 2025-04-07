@@ -71,6 +71,10 @@ const Dashboard = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalPosts, setTotalPosts] = useState(0);
+  const [approvedPosts, setApprovedPosts] = useState([]);
   const [showFlagModal, setShowFlagModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPostDetailModal, setShowPostDetailModal] = useState(false);
@@ -94,10 +98,14 @@ const Dashboard = () => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://stage.suniyenetajee.com/api/v1/web/posts/?status=pending', {
-          headers: {
-            'Authorization': 'Token 7b257e1452f1115b0c70f80a1d54ccd8615aa52c'
-          }
+        
+        // Use hardcoded token directly
+        const headers = {
+          'Authorization': 'Token 7b257e1452f1115b0c70f80a1d54ccd8615aa52c'
+        };
+        
+        const response = await fetch(`https://stage.suniyenetajee.com/api/v1/web/posts/?status=pending&page=${currentPage}&ordering=date_created&page_size=10`, {
+          headers: headers
         });
         
         if (!response.ok) {
@@ -110,6 +118,13 @@ const Dashboard = () => {
         console.log('API Response Data:', data);
         console.log('API Results:', data.results);
         
+        // Set pagination information
+        setTotalPosts(data.count);
+        
+        // Calculate total pages - now using 10 items per page
+        const calculatedTotalPages = Math.ceil(data.count / 10);
+        setTotalPages(calculatedTotalPages);
+        
         // Transform API data to match our application structure
         const formattedPosts = data.results.map(post => ({
           id: post.id,
@@ -117,9 +132,10 @@ const Dashboard = () => {
           content: post.description || "No content", // Use description as content as well
           author: post.created_by.full_name,
           date: new Date(post.date_created).toISOString().split('T')[0], // Format date
+          date_created: post.date_created, // Preserve the original date_created field
           flagged: false,
           image: post.media.length > 0 ? `https://stage.suniyenetajee.com${post.media[0].media}` : null,
-          authorImage: `https://stage.suniyenetajee.com${post.created_by.picture}`
+          authorImage: post.created_by.picture ? `https://stage.suniyenetajee.com${post.created_by.picture}` : null
         }));
         
         // Log the formatted posts
@@ -134,8 +150,9 @@ const Dashboard = () => {
       }
     };
     
+    console.log(`Fetching data for page ${currentPage}`);
     fetchPosts();
-  }, []);
+  }, [currentPage]);
 
   // Handle edit changes
   const handleEditChange = (e) => {
@@ -260,6 +277,14 @@ const Dashboard = () => {
     });
     setFormErrors({});
     setShowNewPostModal(false);
+  };
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    console.log(`Changing to page ${page}`);
+    setCurrentPage(page);
+    // Scroll to top of the table when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const statsCards = [
@@ -491,7 +516,16 @@ const Dashboard = () => {
                   {error}
                 </div>
               ) : (
-                <PostReview posts={posts} setPosts={setPosts} />
+                <PostReview 
+                  posts={posts} 
+                  setPosts={setPosts} 
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalPosts={totalPosts}
+                  approvedPosts={approvedPosts}
+                  setApprovedPosts={setApprovedPosts}
+                  onPageChange={handlePageChange}
+                />
               )}
             </Card.Body>
           </Card>

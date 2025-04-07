@@ -212,3 +212,54 @@ table.table td,
 table.table th {
   vertical-align: middle !important;
 }
+
+/* Pagination Styles - Black Theme */
+.pagination {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.pagination .page-link {
+  color: #212529 !important;
+  background-color: #fff !important;
+  border-color: #dee2e6 !important;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  min-width: 40px;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.pagination .page-item.active .page-link {
+  color: #fff !important;
+  background-color: #000 !important;
+  border-color: #000 !important;
+  font-weight: 600;
+}
+
+.pagination .page-link:hover {
+  color: #000 !important;
+  background-color: #e9ecef !important;
+  border-color: #dee2e6 !important;
+  transform: translateY(-1px);
+}
+
+.pagination .page-link:focus {
+  box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.25) !important;
+  outline: none;
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #6c757d !important;
+  background-color: #fff !important;
+  border-color: #dee2e6 !important;
+  cursor: not-allowed;
+}
+
+/* Ellipsis styles */
+.pagination .page-item.disabled .page-link {
+  pointer-events: none;
+  background-color: #fff !important;
+}

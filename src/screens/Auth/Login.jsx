@@ -57,7 +57,16 @@ const Login = () => {
         },
         body: JSON.stringify({ username: email, password }),
       });
+      
+      // Log the raw response status and headers
+      console.log('Login API Response Status:', response.status);
+      console.log('Login API Response Headers:', Object.fromEntries([...response.headers.entries()]));
+      
       const data = await response.json();
+      
+      // Log the parsed response data
+      console.log('Login API Response Data:', data);
+      
       if (response.ok) {
         localStorage.setItem("auth", "true");
         localStorage.setItem("token", data.token);
@@ -66,6 +75,7 @@ const Login = () => {
         setError(data.message || "Invalid credentials. Please try again.");
       }
     } catch (error) {
+      console.error('Login API Error:', error);
       setError("Something went wrong. Please try again later.");
     }
 
