@@ -92,6 +92,7 @@ const Dashboard = () => {
     imagePreview: ''
   });
   const [formErrors, setFormErrors] = useState({});
+  const [activeFilter, setActiveFilter] = useState("pending");
   
   useEffect(() => {
     // Fetch posts from API
@@ -104,9 +105,13 @@ const Dashboard = () => {
           'Authorization': 'Token 7b257e1452f1115b0c70f80a1d54ccd8615aa52c'
         };
         
-        const response = await fetch(`https://stage.suniyenetajee.com/api/v1/web/posts/?status=pending&page=${currentPage}&ordering=date_created&page_size=10`, {
-          headers: headers
-        });
+        // Determine which API endpoint to use based on activeFilter
+        const status = activeFilter === "approved" ? "approved" : "pending";
+        const apiUrl = `https://stage.suniyenetajee.com/api/v1/web/posts/?status=${status}&page=${currentPage}&ordering=date_created&page_size=10`;
+        
+        console.log('Fetching approved posts from:', apiUrl);
+        
+        const response = await fetch(apiUrl, { headers });
         
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -114,45 +119,58 @@ const Dashboard = () => {
         
         const data = await response.json();
         
-        // Log the raw API response data for inspection
-        console.log('API Response Data:', data);
-        console.log('API Results:', data.results);
+        console.log('Approved Posts API Response:', {
+          count: data.count,
+          results: data.results,
+          next: data.next,
+          previous: data.previous
+        });
         
-        // Set pagination information
+        data.results.forEach((post, index) => {
+          console.log(`Approved Post ${index + 1}:`, {
+            id: post.id,
+            date_created: post.date_created,
+            description: post.description,
+            created_by: post.created_by,
+            media: post.media
+          });
+        });
+        
         setTotalPosts(data.count);
+        setTotalPages(Math.ceil(data.count / 10));
         
-        // Calculate total pages - now using 10 items per page
-        const calculatedTotalPages = Math.ceil(data.count / 10);
-        setTotalPages(calculatedTotalPages);
-        
-        // Transform API data to match our application structure
         const formattedPosts = data.results.map(post => ({
           id: post.id,
-          title: post.description || "No title", // Use description as title or default
-          content: post.description || "No content", // Use description as content as well
+          title: post.description || "No title",
+          content: post.description || "No content",
           author: post.created_by.full_name,
-          date: new Date(post.date_created).toISOString().split('T')[0], // Format date
-          date_created: post.date_created, // Preserve the original date_created field
+          date: new Date(post.date_created).toISOString().split('T')[0],
+          date_created: post.date_created,
           flagged: false,
           image: post.media.length > 0 ? `https://stage.suniyenetajee.com${post.media[0].media}` : null,
-          authorImage: post.created_by.picture ? `https://stage.suniyenetajee.com${post.created_by.picture}` : null
+          authorImage: post.created_by.picture ? `https://stage.suniyenetajee.com${post.created_by.picture}` : null,
+          isApproved: status === "approved"
         }));
         
-        // Log the formatted posts
-        console.log('Formatted Posts:', formattedPosts);
-        
+        console.log('Formatted Approved Posts:', formattedPosts);
         setPosts(formattedPosts);
+        
+        if (status === "approved") {
+          const approvedPostIds = data.results.map(post => post.id);
+          setApprovedPosts(approvedPostIds);
+          console.log('Approved Post IDs:', approvedPostIds);
+        }
       } catch (err) {
-        console.error("Error fetching posts:", err);
+        console.error("Error fetching approved posts:", err);
         setError("Failed to load posts. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
     
-    console.log(`Fetching data for page ${currentPage}`);
+    console.log(`Fetching data for page ${currentPage} with filter ${activeFilter}`);
     fetchPosts();
-  }, [currentPage]);
+  }, [currentPage, activeFilter]);
 
   // Handle edit changes
   const handleEditChange = (e) => {
@@ -285,6 +303,12 @@ const Dashboard = () => {
     setCurrentPage(page);
     // Scroll to top of the table when page changes
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Add this function to handle filter changes
+  const handleFilterChange = (filter) => {
+    setActiveFilter(filter);
+    setCurrentPage(1); // Reset to first page when changing filters
   };
 
   const statsCards = [
@@ -525,6 +549,8 @@ const Dashboard = () => {
                   approvedPosts={approvedPosts}
                   setApprovedPosts={setApprovedPosts}
                   onPageChange={handlePageChange}
+                  activeFilter={activeFilter}
+                  onFilterChange={handleFilterChange}
                 />
               )}
             </Card.Body>

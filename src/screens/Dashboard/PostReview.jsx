@@ -23,8 +23,9 @@ import {
   FaFileSignature,
   FaComments,
   FaCheck,
+  FaClock
 } from "react-icons/fa";
-import { FiTrash, FiFlag, FiClock, FiEdit } from "react-icons/fi";
+import { FiTrash, FiFlag, FiClock as FiClockIcon, FiEdit } from "react-icons/fi";
 
 const colors = {
   WHITE: "#fff",
@@ -74,7 +75,9 @@ const PostReview = ({
   onPageChange,
   totalPosts = 0,
   approvedPosts = [],
-  setApprovedPosts
+  setApprovedPosts,
+  activeFilter = "pending",
+  onFilterChange
 }) => {
   const [showFlagModal, setShowFlagModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -83,7 +86,6 @@ const PostReview = ({
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedPost, setEditedPost] = useState(null);
   const [approvingPostId, setApprovingPostId] = useState(null);
-  const [activeFilter, setActiveFilter] = useState("all"); // "all", "flagged", "review", "approved"
 
   const navigate = useNavigate();
 
@@ -289,6 +291,12 @@ const PostReview = ({
 
   // Check if a post is approved
   const isPostApproved = (postId) => {
+    // First check if the post has the isApproved flag
+    const post = posts.find(p => p.id === postId);
+    if (post && post.isApproved) {
+      return true;
+    }
+    // Then check the approvedPosts array
     return approvedPosts.includes(postId);
   };
 
@@ -375,6 +383,45 @@ const PostReview = ({
             <Col xs={12}>
               <Card className="border-0 shadow-sm">
                 <Card.Body className="p-0">
+                  {/* Add filter buttons at the top */}
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <div className="d-flex align-items-center gap-2">
+                      <Button
+                        variant={activeFilter === "pending" ? "primary" : "outline-primary"}
+                        size="sm"
+                        onClick={() => onFilterChange("pending")}
+                        style={{
+                          borderColor: activeFilter === "pending" ? "#000" : "#000",
+                          backgroundColor: activeFilter === "pending" ? "#000" : "transparent",
+                          color: activeFilter === "pending" ? "white" : "#000",
+                          transition: "all 0.2s ease"
+                        }}
+                      >
+                        <FaClock style={{ marginRight: "5px", color: activeFilter === "pending" ? "white" : "#000" }} />
+                        All Posts
+                      </Button>
+                      <Button
+                        variant={activeFilter === "approved" ? "primary" : "outline-primary"}
+                        size="sm"
+                        onClick={() => onFilterChange("approved")}
+                        style={{
+                          borderColor: activeFilter === "approved" ? "#000" : "#000",
+                          backgroundColor: activeFilter === "approved" ? "#000" : "transparent",
+                          color: activeFilter === "approved" ? "white" : "#000",
+                          transition: "all 0.2s ease"
+                        }}
+                      >
+                        <FaCheck style={{ marginRight: "5px", color: activeFilter === "approved" ? "white" : "#000" }} />
+                        Approved
+                      </Button>
+                    </div>
+                    <div className="d-flex align-items-center gap-2">
+                      <div className="text-muted small">
+                        Showing {posts.length} of {totalPosts} posts
+                      </div>
+                    </div>
+                  </div>
+
                   <Table bordered hover responsive className="mb-0 table-aligned-with-header">
                     <thead>
                       <tr>
@@ -643,7 +690,7 @@ const PostReview = ({
                         e.currentTarget.style.backgroundColor = "white";
                       }
                     }}
-                    onClick={() => setActiveFilter("all")}
+                    onClick={() => onFilterChange("all")}
                   >
                     <FaSearch className="me-2" style={{ color: activeFilter === "all" ? "white" : "#212529" }} /> Show All
                   </Button>
@@ -682,9 +729,9 @@ const PostReview = ({
                         e.currentTarget.style.backgroundColor = "white";
                       }
                     }}
-                    onClick={() => setActiveFilter(activeFilter === "review" ? "all" : "review")}
+                    onClick={() => onFilterChange(activeFilter === "review" ? "all" : "review")}
                   >
-                    <FiClock className="me-2" style={{ color: activeFilter === "review" ? "white" : "#f0ad4e" }} /> Under Review
+                    <FiClockIcon className="me-2" style={{ color: activeFilter === "review" ? "white" : "#f0ad4e" }} /> Under Review
                   </Button>
                 </div>
 
@@ -724,7 +771,7 @@ const PostReview = ({
                         e.currentTarget.style.backgroundColor = "white";
                       }
                     }}
-                    onClick={() => setActiveFilter(activeFilter === "flagged" ? "all" : "flagged")}
+                    onClick={() => onFilterChange(activeFilter === "flagged" ? "all" : "flagged")}
                   >
                     <FaFlag className="me-2" style={{ color: activeFilter === "flagged" ? "white" : "#dc3545" }} /> Flagged Only
                   </Button>
@@ -763,9 +810,9 @@ const PostReview = ({
                         e.currentTarget.style.backgroundColor = "white";
                       }
                     }}
-                    onClick={() => setActiveFilter(activeFilter === "approved" ? "all" : "approved")}
+                    onClick={() => onFilterChange(activeFilter === "approved" ? "all" : "approved")}
                   >
-                    <FiClock className="me-2" style={{ color: activeFilter === "approved" ? "white" : "#28a745" }} /> Approved
+                    <FiClockIcon className="me-2" style={{ color: activeFilter === "approved" ? "white" : "#28a745" }} /> Approved
                   </Button>
                 </div>
               </Card.Body>
