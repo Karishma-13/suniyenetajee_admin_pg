@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Container, Card, Button, Row, Col } from "react-bootstrap";
 import colors from "../../assets/css/colors.js";
 
-const Login = () => {
+const ForgotPassword = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   // Track window resize for responsive adjustments
@@ -42,47 +42,40 @@ const Login = () => {
       card: {
         padding: isMobile ? "1.5rem 1rem" : "2rem 1.5rem",
       },
-      link: {
-        fontSize: isMobile ? "0.85rem" : "0.9rem",
-      }
     };
   };
 
   const responsiveStyles = getResponsiveStyles();
 
-  const handleLogin = async () => {
-    // Uncomment this for API usage
+  const handleResetPassword = async () => {
+    if (!email) {
+      setError("Please enter your email address");
+      return;
+    }
+
     try {
-      const response = await fetch("https://stage.suniyenetajee.com/api/v1/web/login/", {
+      const response = await fetch("https://stage.suniyenetajee.com/api/v1/web/reset-password/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username: email, password }),
+        body: JSON.stringify({ email }),
       });
-
-      // Log the raw response status and headers
-      console.log('Login API Response Status:', response.status);
-      console.log('Login API Response Headers:', Object.fromEntries([...response.headers.entries()]));
 
       const data = await response.json();
 
-      // Log the parsed response data
-      console.log('Login API Response Data:', data);
-
       if (response.ok) {
-        localStorage.setItem("auth", "true");
-        localStorage.setItem("token", data.token);
-        navigate("/dashboard");
+        setSuccess("Password reset instructions have been sent to your email");
+        setError("");
       } else {
-        setError(data.message || "Invalid credentials. Please try again.");
+        setError(data.message || "Failed to send reset instructions. Please try again.");
+        setSuccess("");
       }
     } catch (error) {
-      console.error('Login API Error:', error);
+      console.error('Reset Password API Error:', error);
       setError("Something went wrong. Please try again later.");
+      setSuccess("");
     }
-
-    // navigate("/dashboard");
   };
 
   return (
@@ -112,7 +105,7 @@ const Login = () => {
                 fontSize: responsiveStyles.heading.fontSize,
               }}
             >
-              Admin Login
+              Reset Password
             </h3>
 
             {error && (
@@ -126,6 +119,28 @@ const Login = () => {
                 {error}
               </p>
             )}
+
+            {success && (
+              <p
+                style={{
+                  color: "green",
+                  textAlign: "center",
+                  fontSize: responsiveStyles.error.fontSize,
+                }}
+              >
+                {success}
+              </p>
+            )}
+
+            <p
+              style={{
+                textAlign: "center",
+                marginBottom: "1.5rem",
+                fontSize: responsiveStyles.error.fontSize,
+              }}
+            >
+              Enter your email address and we'll send you instructions on your email to reset your password.
+            </p>
 
             <input
               type="email"
@@ -141,33 +156,6 @@ const Login = () => {
                 fontSize: responsiveStyles.input.fontSize,
               }}
             />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{
-                width: "100%",
-                padding: responsiveStyles.input.padding,
-                marginBottom: responsiveStyles.input.marginBottom,
-                border: "1px solid #ccc",
-                borderRadius: "0.5rem",
-                fontSize: responsiveStyles.input.fontSize,
-              }}
-            />
-            
-            <div 
-              style={{
-                textAlign: "right",
-                marginBottom: "1rem",
-                fontSize: responsiveStyles.link.fontSize,
-                cursor: "pointer",
-                color: colors.btncolor
-              }}
-              onClick={() => navigate("/forgot-password")}
-            >
-              Forgot Password?
-            </div>
             
             <Button
               style={{
@@ -178,10 +166,23 @@ const Login = () => {
                 fontSize: responsiveStyles.button.fontSize,
                 marginTop: 15
               }}
-              onClick={handleLogin}
+              onClick={handleResetPassword}
             >
-              Login
+              Submit
             </Button>
+
+            <div 
+              style={{
+                textAlign: "center",
+                marginTop: "1.5rem",
+                fontSize: responsiveStyles.error.fontSize,
+                cursor: "pointer",
+                color: colors.btncolor
+              }}
+              onClick={() => navigate("/")}
+            >
+              Back to Login
+            </div>
           </Card>
         </Col>
       </Row>
@@ -189,4 +190,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ForgotPassword; 

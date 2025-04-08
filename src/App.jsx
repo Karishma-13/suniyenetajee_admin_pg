@@ -1,7 +1,9 @@
-import { useState } from "react";
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Dashboard from "./screens/Dashboard/Dashboard";
 import Login from "./screens/Auth/Login";
+import ForgotPassword from "./screens/Auth/ForgotPassword";
+import Dashboard from "./screens/Dashboard/Dashboard";
+import PrivateRoute from "./components/PrivateRoute";
 import Posts from "./screens/Dashboard/Posts";
 import Demo from "./screens/Demo";
 import PostReview from "./screens/Dashboard/PostReview";
@@ -11,7 +13,15 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route
+          path="/dashboard/*"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
         <Route path="/posts" element={<Posts />} />
         <Route path="/postreview" element={<PostReview />} />
         <Route path="/demo" element={<Demo />} />

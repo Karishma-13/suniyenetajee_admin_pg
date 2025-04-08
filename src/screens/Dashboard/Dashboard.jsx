@@ -38,6 +38,7 @@ import {
 } from "recharts";
 import "../../assets/css/Dashboard.css";
 import { Link } from "react-router-dom";
+import { FaPoll } from "react-icons/fa";
 
 // Comment out the initialPosts
 // const initialPosts = [
@@ -373,12 +374,12 @@ const Dashboard = () => {
       percent: "5%",
     },
     {
-      title: "InActive Users",
-      value: "40%",
-      icon: <FiUserX className="stat-icon" />,
+      title: "Polling Turn Up",
+      value: "75%",
+      icon: <FaPoll className="stat-icon" />,
       color: "info",
       increase: true,
-      percent: "18%",
+      percent: "15%",
     },
   ];
 
