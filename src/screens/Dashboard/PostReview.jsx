@@ -370,6 +370,9 @@ const PostReview = ({
       case "pending":
         filtered = posts.filter(post => !isPostApproved(post.id));
         break;
+      case "deleted":
+        filtered = posts.filter(post => post.isDeleted === true);
+        break;
       default:
         filtered = posts; // Show all posts by default
     }
@@ -456,6 +459,10 @@ const PostReview = ({
                           backgroundColor: "#000",
                           color: "white",
                           transition: "all 0.2s ease",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          maxWidth: "100%"
                         }}
                         onClick={() => {
                           setShowNewPostModal(true);
@@ -480,8 +487,8 @@ const PostReview = ({
                   </div>
 
                   {/* Add filter buttons at the top */}
-                  <div className="d-flex justify-content-between align-items-center p-3">
-                    <div className="d-flex align-items-center gap-2">
+                  <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center p-3">
+                    <div className="d-flex flex-wrap align-items-center gap-2 mb-2 mb-sm-0">
                       <Button
                         variant={activeFilter === "all" ? "primary" : "outline-primary"}
                         size="sm"
@@ -490,7 +497,8 @@ const PostReview = ({
                           borderColor: activeFilter === "all" ? "#000" : "#000",
                           backgroundColor: activeFilter === "all" ? "#000" : "transparent",
                           color: activeFilter === "all" ? "white" : "#000",
-                          transition: "all 0.2s ease"
+                          transition: "all 0.2s ease",
+                          whiteSpace: "nowrap"
                         }}
                       >
                         <FaClock style={{ marginRight: "5px", color: activeFilter === "all" ? "white" : "#000" }} />
@@ -504,7 +512,8 @@ const PostReview = ({
                           borderColor: activeFilter === "approved" ? "#000" : "#000",
                           backgroundColor: activeFilter === "approved" ? "#000" : "transparent",
                           color: activeFilter === "approved" ? "white" : "#000",
-                          transition: "all 0.2s ease"
+                          transition: "all 0.2s ease",
+                          whiteSpace: "nowrap"
                         }}
                       >
                         <FaCheck style={{ marginRight: "5px", color: activeFilter === "approved" ? "white" : "#000" }} />
@@ -513,7 +522,7 @@ const PostReview = ({
                     </div>
                     <div className="d-flex align-items-center gap-2">
                       <div className="text-muted small">
-                        Showing {posts.length} of {totalPosts} posts
+                        Showing {filteredPosts().length} of {totalPosts} posts
                       </div>
                     </div>
                   </div>
@@ -695,13 +704,15 @@ const PostReview = ({
 
                   {/* Pagination - Always show when there are posts */}
                   {getCurrentFilteredPosts().length > 0 && (
-                    <div className="d-flex flex-column align-items-center mt-5 mb-3">
-                      <div className="text-muted small">
+                    <div className="d-flex flex-column align-items-center mt-5 mb-3 px-3">
+                      <div className="text-muted small text-center mb-2">
                         Showing page {currentPage} of {totalPages} (Total posts per page: {getCurrentFilteredPosts().length})
                       </div>
-                      <Pagination className="mb-5">
-                        {renderPaginationItems()}
-                      </Pagination>
+                      <div className="w-100 overflow-auto">
+                        <Pagination className="mb-5 flex-wrap justify-content-center">
+                          {renderPaginationItems()}
+                        </Pagination>
+                      </div>
                     </div>
                   )}
                 </Card.Body>
@@ -907,6 +918,50 @@ const PostReview = ({
                     onClick={() => onFilterChange(activeFilter === "approved" ? "all" : "approved")}
                   >
                     <FiClockIcon className="me-2" style={{ color: activeFilter === "approved" ? "white" : "#28a745" }} /> Approved
+                  </Button>
+                </div>
+
+                {/* Third Row: Deleted Posts */}
+                <div className="d-flex gap-2 mb-3">
+                  {/* Deleted Posts Button */}
+                  <Button
+                    variant={activeFilter === "deleted" ? "danger" : "light"}
+                    className="w-100 d-flex align-items-center justify-content-center"
+                    style={{
+                      borderColor: "#dee2e6",
+                      backgroundColor: activeFilter === "deleted" ? "#dc3545" : "white",
+                      transition: "all 0.2s ease",
+                      gap: "8px"
+                    }}
+                    onMouseDown={(e) => {
+                      if (activeFilter !== "deleted") {
+                        e.currentTarget.style.backgroundColor = "#f5f5f5";
+                      }
+                    }}
+                    onMouseUp={(e) => {
+                      if (activeFilter !== "deleted") {
+                        e.currentTarget.style.backgroundColor = "white";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (activeFilter !== "deleted") {
+                        e.currentTarget.style.backgroundColor = "white";
+                      }
+                    }}
+                    onMouseOver={(e) => {
+                      if (activeFilter !== "deleted") {
+                        e.currentTarget.style.backgroundColor = "#f5f5f5";
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      if (activeFilter !== "deleted") {
+                        e.currentTarget.style.backgroundColor = "white";
+                      }
+                    }}
+                    onClick={() => onFilterChange(activeFilter === "deleted" ? "all" : "deleted")}
+                  >
+                    <FiTrash style={{ color: activeFilter === "deleted" ? "white" : "#dc3545" }} />
+                    <span>Deleted Posts</span>
                   </Button>
                 </div>
               </Card.Body>
